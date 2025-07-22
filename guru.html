@@ -1806,10 +1806,75 @@ async function renderDailySummary() {
 
 async function fetchRekap(semester) {
     const rekapContentDiv = document.getElementById('rekap-content-semester' + semester);
-    rekapContentDiv.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat rekap dari cache...</p></div>';
+    rekapContentDiv.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat rekap...</p></div>';
     
     try {
         const currentYear = new Date().getFullYear();
+        
+        // Langkah 1: Ambil semua siswa yang relevan (tidak berubah)
+        let siswaQuery = db.collection('siswa').where('status', '==', 'Aktif');
+        if (currentUser.role === 'walikelas') {
+            siswaQuery = siswaQuery.where('kelas', '==', currentUser.kelasDiampu);
+        }
+        const siswaSnapshot = await siswaQuery.get();
+
+        if (siswaSnapshot.empty) {
+            rekapContentDiv.innerHTML = '<div class="alert alert-info">Tidak ada siswa aktif untuk ditampilkan.</div>';
+            return;
+        }
+
+        const allRelevantSiswa = siswaSnapshot.docs.map(doc => doc.data());
+        const expectedCacheIds = allRelevantSiswa.map(s => `${s.nisn}_${currentYear}_${semester}`);
+
+        // Langkah 2: Periksa dan buat cache yang belum ada
+        const cacheBatch = db.batch();
+        let cacheNeedsUpdate = false;
+        
+        if (expectedCacheIds.length > 0) {
+            // *** LOGIKA BARU DENGAN CHUNKING UNTUK MENGHINDARI ERROR 'in' ***
+            const existingCacheDocs = [];
+            const promises = [];
+            for (let i = 0; i < expectedCacheIds.length; i += 10) {
+                const chunk = expectedCacheIds.slice(i, i + 10);
+                promises.push(
+                    db.collection('cache_rekap_semester')
+                      .where(firebase.firestore.FieldPath.documentId(), 'in', chunk)
+                      .get()
+                );
+            }
+            const snapshotResults = await Promise.all(promises);
+            snapshotResults.forEach(snapshot => {
+                snapshot.docs.forEach(doc => existingCacheDocs.push(doc));
+            });
+            // *** AKHIR LOGIKA BARU ***
+            
+            const existingCacheIds = new Set(existingCacheDocs.map(doc => doc.id));
+
+            // Cari siswa yang belum punya cache (logika ini tidak berubah)
+            allRelevantSiswa.forEach(siswa => {
+                const cacheId = `${siswa.nisn}_${currentYear}_${semester}`;
+                if (!existingCacheIds.has(cacheId)) {
+                    console.log(`Membuat cache awal untuk ${siswa.nama} (NISN: ${siswa.nisn})`);
+                    const cacheRef = db.collection('cache_rekap_semester').doc(cacheId);
+                    const baseData = {
+                        nisn: siswa.nisn, nama: siswa.nama, kelas: siswa.kelas,
+                        nomorAbsen: siswa.nomorAbsen || 0, tahun: currentYear, semester: semester,
+                        totalSakit: 0, totalIzin: 0, totalAlpha: 0,
+                        detailAbsensi: []
+                    };
+                    cacheBatch.set(cacheRef, baseData);
+                    cacheNeedsUpdate = true;
+                }
+            });
+        }
+
+        if (cacheNeedsUpdate) {
+            await cacheBatch.commit();
+            console.log("Proses inisialisasi cache selesai.");
+        }
+
+        // Langkah 3: Ambil ulang data dari cache (tidak berubah)
+        rekapContentDiv.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Menyusun data rekap...</p></div>';
         
         let rekapQuery = db.collection('cache_rekap_semester')
             .where('tahun', '==', currentYear)
@@ -1820,26 +1885,21 @@ async function fetchRekap(semester) {
         }
 
         const rekapSnapshot = await rekapQuery.get();
-        
+
         if (rekapSnapshot.empty) {
-            rekapContentDiv.innerHTML = '<div class="alert alert-info">Belum ada data rekap untuk semester ini.</div>';
+            rekapContentDiv.innerHTML = '<div class="alert alert-info">Data rekap tidak ditemukan setelah inisialisasi.</div>';
             return;
         }
-
+        
+        // Langkah 4: Render data (tidak berubah)
         const rekapSiswaByClass = {};
-
         rekapSnapshot.forEach(doc => {
             const rekapData = doc.data();
-            
             if (!rekapSiswaByClass[rekapData.kelas]) {
                 rekapSiswaByClass[rekapData.kelas] = [];
             }
-            
-            // Transformasi data dari cache ke format yang dibutuhkan oleh fungsi render
             rekapSiswaByClass[rekapData.kelas].push({
-                nisn: rekapData.nisn,
-                nama: rekapData.nama,
-                nomorAbsen: rekapData.nomorAbsen,
+                nisn: rekapData.nisn, nama: rekapData.nama, nomorAbsen: rekapData.nomorAbsen,
                 kelas: rekapData.kelas,
                 total: {
                     sakit: rekapData.totalSakit || 0,
@@ -1854,7 +1914,7 @@ async function fetchRekap(semester) {
         renderRekapTableContent();
 
     } catch (error) {
-        console.error("Error fetching semester recap from cache:", error);
+        console.error("Error fetching semester recap:", error);
         rekapContentDiv.innerHTML = `<div class="alert alert-danger">Gagal memuat rekap: ${error.message}</div>`;
     }
 }
@@ -2010,18 +2070,17 @@ async function saveEdit(docId) {
             [`rekap.tgl_${day}.${newFieldHarian}`]: firebase.firestore.FieldValue.increment(1)
         });
         
-        // 5. --- LOGIKA BARU: Update cache rekap semester ---
-        const cacheRef = db.collection('cache_rekap_semester').doc(`${logData.nisn}_${year}_${semester}`);
-        const oldFieldSemester = oldStatus === 'Tanpa Keterangan' ? 'totalAlpha' : `total${oldStatus.charAt(0).toUpperCase() + oldStatus.slice(1)}`;
-        const newFieldSemester = newStatus === 'Tanpa Keterangan' ? 'totalAlpha' : `total${newStatus.charAt(0).toUpperCase() + newStatus.slice(1)}`;
-        
-        batch.update(cacheRef, {
-            [oldFieldSemester]: firebase.firestore.FieldValue.increment(-1),
-            [newFieldSemester]: firebase.firestore.FieldValue.increment(1),
-            detailAbsensi: firebase.firestore.FieldValue.arrayRemove({ tanggal: tglString, status: oldStatus, logId: docId }),
-        });
-        batch.update(cacheRef, {
-            detailAbsensi: firebase.firestore.FieldValue.arrayUnion({ tanggal: tglString, status: newStatus, logId: docId })
+        // 5. >>> KODE BARU: Panggil fungsi update cache semester <<<
+        await updateSemesterCache(batch, {
+            nisn: logData.nisn,
+            nama: logData.nama,
+            kelas: logData.kelas,
+            nomorAbsen: logData.nomorAbsen || 0,
+            newStatus: newStatus,
+            dateObject: timestamp, // Ini adalah objek Date dari logData
+            logId: docId,
+            isCorrection: true,
+            oldStatus: oldStatus
         });
 
 
@@ -2093,6 +2152,18 @@ async function saveUnscanned(e) {
                 const agregatRef = db.collection('agregat_bulanan_kelas').doc(agregatDocId);
                 batch.set(agregatRef, { kelas: siswaInfo.kelas, tahun: year, bulan: month }, { merge: true });
                 batch.update(agregatRef, { [`rekap.tgl_${day}.${statusFieldAgregat}`]: firebase.firestore.FieldValue.increment(1) });
+
+                // 5. >>> KODE BARU: Update Cache Semester <<<
+                await updateSemesterCache(batch, {
+                    nisn: siswaInfo.nisn,
+                    nama: siswaInfo.nama,
+                    kelas: siswaInfo.kelas,
+                    nomorAbsen: siswaInfo.nomorAbsen,
+                    newStatus: absen.status,
+                    dateObject: today, // Gunakan objek Date hari ini
+                    logId: logRef.id
+                });
+
                 
                 await kirimDataAbsensiKeSheet(siswaInfo.nisn, absen.status);
             }
@@ -2209,6 +2280,18 @@ async function saveManualAttendance(e) {
             const agregatRef = db.collection('agregat_bulanan_kelas').doc(agregatDocId);
             batch.set(agregatRef, { kelas: absen.kelas, tahun: year, bulan: month }, { merge: true });
             batch.update(agregatRef, { [`rekap.tgl_${day}.${statusFieldAgregat}`]: firebase.firestore.FieldValue.increment(1) });
+
+            // 4. >>> KODE BARU: Update Cache Semester <<<
+            updateSemesterCache(batch, { // Tidak perlu await karena sudah di dalam loop forEach biasa
+                nisn: absen.nisn,
+                nama: absen.nama,
+                kelas: absen.kelas,
+                nomorAbsen: parseInt(absen.nomorAbsen),
+                newStatus: absen.status,
+                dateObject: selectedDate, // Gunakan objek Date yang dipilih
+                logId: logRef.id
+            });
+
         });
 
         await batch.commit();
@@ -2368,6 +2451,18 @@ document.getElementById('saveDailyCorrectionBtn').addEventListener('click', asyn
             [`rekap.tgl_${day}.${newStatusFieldAgregat}`]: firebase.firestore.FieldValue.increment(1)
         });
 
+        await updateSemesterCache(batch, {
+            nisn: nisn,
+            nama: siswaName,
+            kelas: siswaClass,
+            nomorAbsen: 0, // Nomor absen bisa diambil jika perlu, atau set 0/null jika tidak krusial
+            newStatus: newStatus,
+            dateObject: today,
+            logId: logId,
+            isCorrection: true,
+            oldStatus: originalStatus
+        });
+
         await batch.commit();
 
         Toastify({ text: `Koreksi absensi ${siswaName} berhasil disimpan!`, duration: 3000, gravity: "top", position: "center", style: { background: "#4CAF50" } }).showToast();
@@ -2402,6 +2497,68 @@ function getBadgeClass(status) {
         default:
             return 'primary'; // Biru gelap (default)
     }
+}
+
+/**
+ * Fungsi pusat untuk memperbarui koleksi cache_rekap_semester.
+ * @param {object} batch - Objek batch Firestore yang sedang berjalan.
+ * @param {object} data - Objek yang berisi data absensi.
+ * @param {string} data.nisn - NISN siswa.
+ * @param {string} data.nama - Nama siswa.
+ * @param {string} data.kelas - Kelas siswa.
+ * @param {number} data.nomorAbsen - Nomor absen siswa.
+ * @param {string} data.newStatus - Status absensi baru ('Sakit', 'Izin', 'Tanpa Keterangan').
+ * @param {Date} data.dateObject - Objek Date dari tanggal absensi.
+ * @param {string} data.logId - ID dokumen dari koleksi log_absensi.
+ * @param {boolean} [data.isCorrection=false] - Tandai true jika ini adalah koreksi status.
+ * @param {string} [data.oldStatus] - Status absensi lama (wajib jika isCorrection true).
+ */
+async function updateSemesterCache(batch, data) {
+    const { nisn, nama, kelas, nomorAbsen, newStatus, dateObject, logId, isCorrection = false, oldStatus } = data;
+
+    const year = dateObject.getFullYear();
+    const month = dateObject.getMonth() + 1; // 1-12
+    const semester = (month >= 7 && month <= 12) ? 1 : 2;
+    const tglString = `${year}-${month.toString().padStart(2, '0')}-${dateObject.getDate().toString().padStart(2, '0')}`;
+
+    // Tentukan referensi dokumen cache
+    const cacheRef = db.collection('cache_rekap_semester').doc(`${nisn}_${year}_${semester}`);
+
+    // Tentukan field mana yang akan di-increment
+    const fieldMap = { 'Sakit': 'totalSakit', 'Izin': 'totalIzin', 'Tanpa Keterangan': 'totalAlpha' };
+    const newFieldToIncrement = fieldMap[newStatus];
+    if (!newFieldToIncrement) return; // Keluar jika status tidak relevan (misal: 'Hadir')
+
+    // Siapkan data dasar untuk di-set (jika dokumen belum ada)
+    const baseData = {
+        nisn, nama, kelas, nomorAbsen, tahun: year, semester,
+        totalSakit: 0, totalIzin: 0, totalAlpha: 0,
+        detailAbsensi: []
+    };
+    batch.set(cacheRef, baseData, { merge: true });
+
+    // Siapkan data untuk di-update
+    let dataToUpdate = {
+        [newFieldToIncrement]: firebase.firestore.FieldValue.increment(1),
+        detailAbsensi: firebase.firestore.FieldValue.arrayUnion({ tanggal: tglString, status: newStatus, logId })
+    };
+
+    // Jika ini adalah koreksi, kurangi counter status lama dan hapus detail lama
+    if (isCorrection && oldStatus) {
+        const oldFieldToDecrement = fieldMap[oldStatus];
+        if (oldFieldToDecrement) {
+            dataToUpdate[oldFieldToDecrement] = firebase.firestore.FieldValue.increment(-1);
+            dataToUpdate.detailAbsensi = firebase.firestore.FieldValue.arrayRemove({ tanggal: tglString, status: oldStatus, logId });
+            
+            // Lakukan penghapusan detail lama terlebih dahulu dalam batch
+            batch.update(cacheRef, {
+                 detailAbsensi: firebase.firestore.FieldValue.arrayRemove({ tanggal: tglString, status: oldStatus, logId })
+            });
+        }
+    }
+    
+    // Terapkan update utama
+    batch.update(cacheRef, dataToUpdate);
 }
 
 </script>
