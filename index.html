@@ -8,37 +8,92 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #ffc107;
+            --light-bg: #f8f9fa;
+            --white-bg: #ffffff;
+            --text-dark: #212529;
+            --text-light: #6c757d;
+            --border-radius-lg: 20px;
+            --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
+            --shadow-md: 0 8px 25px rgba(0,0,0,0.08);
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #e9ecef;
+            background-color: var(--light-bg);
         }
+
         .portal-card {
             transition: transform 0.2s, box-shadow 0.2s;
             border: none;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-sm);
         }
+
         .portal-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            box-shadow: var(--shadow-md) !important;
         }
+
         .portal-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
         }
+        
+        .portal-card .card-title {
+            color: var(--text-dark);
+        }
+
+        .portal-card .text-primary .fa-chalkboard-teacher { color: var(--primary-color); }
+        .portal-card .text-success .fa-user-graduate { color: #28a745; }
+        .portal-card .text-warning .fa-user-shield { color: var(--secondary-color); }
+
+        /* --- PERBAIKAN UNTUK MOBILE --- */
+        @media (max-width: 576px) {
+            .main-container {
+                align-items: flex-start !important;
+                padding-top: 4rem; /* Menambah jarak dari atas */
+                padding-bottom: 4rem;
+                min-height: auto;
+            }
+            .main-title {
+                font-size: 1.75rem;
+            }
+            .text-center.mb-5 {
+                margin-bottom: 2.5rem !important; /* Menambah jarak di bawah judul */
+            }
+            .portal-card .card-body {
+                padding: 1.25rem; /* Mengurangi padding di dalam kartu */
+            }
+            .portal-icon {
+                font-size: 2rem; /* Mengecilkan ikon */
+                margin-bottom: 0.5rem;
+            }
+            .portal-card .card-title {
+                font-size: 1.05rem; /* Mengecilkan judul kartu */
+            }
+            .portal-card .card-text {
+                font-size: 0.85rem; /* Mengecilkan teks deskripsi */
+            }
+        }
+
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="row justify-content-center align-items-center main-container" style="min-height: 100vh;">
             <div class="col-lg-10 col-xl-9">
                 <div class="text-center mb-5">
-                    <h1 class="font-weight-bolder text-dark">Sistem Informasi Sekolah</h1>
+                    <h1 class="font-weight-bolder text-dark main-title">Sistem Informasi Sekolah</h1>
                     <p class="lead text-muted">SD Negeri Cicohag</p>
                 </div>
-                <div class="row">
+                <div class="row justify-content-center">
                     <!-- Portal Guru & Staf -->
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-4 col-9 mb-4">
                         <a href="guru.html" class="text-decoration-none">
-                            <div class="card h-100 text-center shadow-sm portal-card">
+                            <div class="card h-100 text-center portal-card">
                                 <div class="card-body p-4">
                                     <div class="portal-icon text-primary"><i class="fas fa-chalkboard-teacher"></i></div>
                                     <h5 class="card-title font-weight-bold">Portal Guru & Staf</h5>
@@ -48,9 +103,9 @@
                         </a>
                     </div>
                     <!-- Portal Siswa & Orang Tua -->
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-4 col-9 mb-4">
                         <a href="ortu.html" class="text-decoration-none">
-                            <div class="card h-100 text-center shadow-sm portal-card">
+                            <div class="card h-100 text-center portal-card">
                                 <div class="card-body p-4">
                                     <div class="portal-icon text-success"><i class="fas fa-user-graduate"></i></div>
                                     <h5 class="card-title font-weight-bold">Portal Siswa & Ortu</h5>
@@ -60,9 +115,9 @@
                         </a>
                     </div>
                     <!-- Panel Admin -->
-                    <div class="col-md-4 mb-4">
+                    <div class="col-md-4 col-9 mb-4">
                         <a href="admin.html" class="text-decoration-none">
-                            <div class="card h-100 text-center shadow-sm portal-card">
+                            <div class="card h-100 text-center portal-card">
                                 <div class="card-body p-4">
                                     <div class="portal-icon text-warning"><i class="fas fa-user-shield"></i></div>
                                     <h5 class="card-title font-weight-bold">Panel Admin</h5>
