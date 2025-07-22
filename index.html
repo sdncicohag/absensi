@@ -3,299 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Selamat Datang di SD Negeri Cicohag - Sekolah Inovatif & Berprestasi</title> 
-    
+    <title>Selamat Datang di Sistem Informasi SD Negeri Cicohag</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #e9ecef;
+        }
+        .portal-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: none;
+        }
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+        }
+        .portal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
-
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
-        <div class="container">
-            <a class="navbar-brand font-weight-bold text-primary" href="#">
-                <img src="https://placehold.co/40x40/0056b3/ffffff?text=S" width="30" height="30" class="d-inline-block align-top mr-2 rounded" alt="Logo Sekolah">
-                SDN Cicohag </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item"><a class="nav-link text-dark font-weight-bold px-3 py-2 mx-1 rounded" href="#tentang">Tentang Kami</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark font-weight-bold px-3 py-2 mx-1 rounded" href="#program">Program</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark font-weight-bold px-3 py-2 mx-1 rounded" href="#kontak">Kontak</a></li>
-                    <li class="nav-item ml-lg-3">
-                        <a class="nav-link btn btn-primary font-weight-bold px-4 py-2 rounded-pill shadow-sm text-white" href="#" data-toggle="modal" data-target="#portalModal">
-                            Portal <i class="fas fa-sign-in-alt ml-2 text-white"></i>
+    <div class="container">
+        <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+            <div class="col-lg-10 col-xl-9">
+                <div class="text-center mb-5">
+                    <h1 class="font-weight-bolder text-dark">Sistem Informasi Sekolah</h1>
+                    <p class="lead text-muted">SD Negeri Cicohag</p>
+                </div>
+                <div class="row">
+                    <!-- Portal Guru & Staf -->
+                    <div class="col-md-4 mb-4">
+                        <a href="guru.html" class="text-decoration-none">
+                            <div class="card h-100 text-center shadow-sm portal-card">
+                                <div class="card-body p-4">
+                                    <div class="portal-icon text-primary"><i class="fas fa-chalkboard-teacher"></i></div>
+                                    <h5 class="card-title font-weight-bold">Portal Guru & Staf</h5>
+                                    <p class="card-text text-muted small">Akses fitur absensi dan manajemen kelas.</p>
+                                </div>
+                            </div>
                         </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <header class="hero-section py-5 text-dark" style="background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), url('https://placehold.co/1920x1080/EAF2FF/333?text=Siswa-Siswi+Ceria') no-repeat center center; background-size: cover;">
-        <div class="container text-center">
-            <h1 class="display-4 font-weight-bolder text-primary">Pendidikan Modern, Masa Depan Cemerlang</h1> 
-            <p class="lead mt-3 mb-4 mx-auto text-dark-bg-shadow" style="max-width: 700px; font-size: 1.25rem;">Membentuk generasi pembelajar sepanjang hayat yang kreatif, inovatif, dan berkarakter mulia.</p> <a href="#pendaftaran" class="btn btn-primary btn-lg shadow-md rounded-pill px-4 py-2">Mulai Pendaftaran <i class="fas fa-arrow-right ml-2"></i></a>
-        </div>
-    </header>
-
-    <main>
-        <section id="tentang" class="py-5 bg-light-bg">
-            <div class="container text-center">
-                <h2 class="section-title text-primary">Sekolah Bagi Semua</h2>
-                <p class="section-subtitle">Tiga pilar utama pendidikan di sekolah kami.</p>
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="icon"><i class="fas fa-brain"></i></div>
-                        <h5 class="font-weight-bold">Akademik Unggul</h5>
-                        <p class="text-muted">Kurikulum Merdeka yang diperkaya dengan program literasi dan numerasi untuk daya saing global.</p>
                     </div>
-                    <div class="info-card">
-                        <div class="icon"><i class="fas fa-heart"></i></div>
-                        <h5 class="font-weight-bold">Pembentukan Karakter</h5>
-                        <p class="text-muted">Penguatan nilai-nilai luhur, budi pekerti, dan kegiatan sosial untuk membentuk pribadi yang peduli, jujur, dan berintegritas.</p>
+                    <!-- Portal Siswa & Orang Tua -->
+                    <div class="col-md-4 mb-4">
+                        <a href="ortu.html" class="text-decoration-none">
+                            <div class="card h-100 text-center shadow-sm portal-card">
+                                <div class="card-body p-4">
+                                    <div class="portal-icon text-success"><i class="fas fa-user-graduate"></i></div>
+                                    <h5 class="card-title font-weight-bold">Portal Siswa & Ortu</h5>
+                                    <p class="card-text text-muted small">Lihat rekap kehadiran dan info kelas.</p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="info-card">
-                        <div class="icon"><i class="fas fa-lightbulb"></i></div>
-                        <h5 class="font-weight-bold">Bakat Terfasilitasi</h5>
-                        <p class="text-muted">Ekstrakurikuler beragam dari robotik, seni, hingga olahraga untuk mengembangkan potensi unik setiap anak.</p>
+                    <!-- Panel Admin -->
+                    <div class="col-md-4 mb-4">
+                        <a href="admin.html" class="text-decoration-none">
+                            <div class="card h-100 text-center shadow-sm portal-card">
+                                <div class="card-body p-4">
+                                    <div class="portal-icon text-warning"><i class="fas fa-user-shield"></i></div>
+                                    <h5 class="card-title font-weight-bold">Panel Admin</h5>
+                                    <p class="card-text text-muted small">Kelola data master siswa dan staf sekolah.</p>
+                                </div>
+                            </div>
+                        </a>
                     </div>
                 </div>
             </div>
-        </section>
-
-        <section id="program" class="py-5">
-            <div class="container">
-                <h2 class="section-title text-primary text-center">Program Unggulan Kami</h2>
-                <p class="section-subtitle text-center">Inilah yang membuat pembelajaran di SD Negeri Cicohag berbeda dan menarik.</p>
-                
-                <div class="row mb-5 align-items-center">
-                    <div class="col-lg-6">
-                        <img src="https://placehold.co/600x400/EAF2FF/333?text=Proses+Pembelajaran" class="img-fluid rounded-lg shadow-md" alt="Proses Pembelajaran">
-                    </div>
-                    <div class="col-lg-6 pl-lg-5 mt-4 mt-lg-0">
-                        <h3 class="font-weight-bold text-dark">Proses Pembelajaran Aktif</h3>
-                        <p class="text-muted">Kami menerapkan metode pembelajaran berbasis proyek (Project-Based Learning) yang mendorong siswa untuk aktif, kreatif, dan mampu memecahkan masalah. Belajar menjadi petualangan yang menyenangkan, bukan sekadar hafalan.</p>
-                        <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 mt-3" data-toggle="modal" data-target="#curriculumModal">Lihat Kurikulum <i class="fas fa-angle-right ml-2"></i></a>
-                    </div>
-                </div>
-                <div class="row align-items-center">
-                    <div class="col-lg-6 order-lg-2">
-                        <img src="https://placehold.co/600x400/EAF2FF/333?text=Lingkungan+Sekolah" class="img-fluid rounded-lg shadow-md" alt="Lingkungan Sekolah">
-                    </div>
-                    <div class="col-lg-6 pr-lg-5 mt-4 mt-lg-0 order-lg-1">
-                        <h3 class="font-weight-bold text-dark">Lingkungan Sekolah yang Mendukung</h3>
-                        <p class="text-muted">Dengan fasilitas modern, ruang kelas yang nyaman, dan area bermain yang aman, kami menciptakan lingkungan yang kondusif bagi tumbuh kembang siswa secara fisik, mental, dan sosial.</p>
-                        <a href="#" class="btn btn-outline-primary rounded-pill px-4 py-2 mt-3" data-toggle="modal" data-target="#facilitiesModal">Jelajahi Fasilitas <i class="fas fa-angle-right ml-2"></i></a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <div class="modal fade" id="curriculumModal" tabindex="-1" role="dialog" aria-labelledby="curriculumModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content rounded-lg shadow-md">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-weight-bold text-primary" id="curriculumModalLabel"><i class="fas fa-book mr-2"></i> Kurikulum Kami</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body pt-0">
-                <h6 class="text-muted mt-3 mb-3">Pendidikan Berbasis Proyek dan Penguatan Karakter</h6>
-                <p>Kurikulum di SD Negeri Cicohag dirancang untuk mengembangkan potensi penuh setiap siswa, tidak hanya dalam aspek akademik tetapi juga karakter dan keterampilan hidup. Kami mengadopsi Kurikulum Merdeka yang diperkaya dengan:</p>
-                <ul class="list-unstyled">
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Pembelajaran Berbasis Proyek:</strong> Siswa belajar melalui proyek nyata yang menstimulasi kreativitas, pemecahan masalah, dan kerja sama tim.</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Literasi & Numerasi Intensif:</strong> Program khusus untuk memperkuat kemampuan dasar membaca, menulis, dan berhitung sebagai fondasi pembelajaran.</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Penguatan Karakter:</strong> Penanaman nilai-nilai seperti kejujuran, disiplin, toleransi, dan kepedulian melalui kegiatan sehari-hari dan program khusus.</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Teknologi Edukasi:</strong> Integrasi teknologi dalam pembelajaran untuk mempersiapkan siswa menghadapi era digital.</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Pengembangan Bakat:</strong> Beragam pilihan ekstrakurikuler di bidang seni, olahraga, sains, dan bahasa.</li>
-                </ul>
-                <p class="text-muted small">Untuk informasi lebih detail mengenai silabus dan alur pembelajaran, silakan hubungi pihak sekolah.</p>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary rounded-pill btn-sm" data-dismiss="modal">Tutup</button>
-            </div>
-            </div>
         </div>
-        </div>
-
-        <div class="modal fade" id="facilitiesModal" tabindex="-1" role="dialog" aria-labelledby="facilitiesModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content rounded-lg shadow-md">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-weight-bold text-primary" id="facilitiesModalLabel"><i class="fas fa-building mr-2"></i> Fasilitas Sekolah</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body pt-0">
-                <h6 class="text-muted mt-3 mb-3">Lingkungan Belajar yang Nyaman dan Lengkap</h6>
-                <p>SD Negeri Cicohag menyediakan berbagai fasilitas modern untuk mendukung proses belajar mengajar dan pengembangan siswa:</p>
-                <ul class="list-unstyled">
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Ruang Kelas Nyaman dan Ber-AC</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Perpustakaan Digital Lengkap</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Laboratorium Komputer Modern</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Lapangan Olahraga Multifungsi (Futsal, Basket)</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Area Bermain Anak yang Aman</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Kantin Sehat dan Bersih</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Mushola untuk Kegiatan Keagamaan</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> Ruang UKS (Unit Kesehatan Sekolah)</li>
-                </ul>
-                <p class="text-muted small">Kami berkomitmen untuk terus meningkatkan fasilitas demi kenyamanan dan keamanan seluruh warga sekolah.</p>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary rounded-pill btn-sm" data-dismiss="modal">Tutup</button>
-            </div>
-            </div>
-        </div>
-        </div>
-
-        <div class="modal fade" id="registrationModal" tabindex="-1" role="dialog" aria-labelledby="registrationModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content rounded-lg shadow-md">
-            <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title font-weight-bold text-primary" id="registrationModalLabel"><i class="fas fa-user-plus mr-2"></i> Alur Pendaftaran & Biaya</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body pt-0">
-                <h6 class="text-muted mt-3 mb-3">Jadilah Bagian dari Keluarga Besar SD Negeri Cicohag</h6>
-                
-                <h5 class="font-weight-bold text-dark mt-4">Alur Pendaftaran:</h5>
-                <ul class="list-unstyled">
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Langkah 1: Pengambilan Formulir:</strong> Calon peserta didik mengambil formulir pendaftaran di sekolah atau mengunduh secara daring melalui tautan yang disediakan.</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Langkah 2: Pengisian & Penyerahan Berkas:</strong> Lengkapi formulir dan siapkan berkas persyaratan (akte lahir, kartu keluarga, KTP orang tua, pas foto). Serahkan berkas ke panitia PPDB.</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Langkah 3: Seleksi/Observasi:</strong> Calon peserta didik akan mengikuti seleksi atau observasi sederhana (misal, wawancara atau pengenalan angka/huruf).</li>
-                <li><i class="fas fa-check-circle text-success mr-2"></i> <strong>Langkah 4: Pengumuman & Daftar Ulang:</strong> Hasil seleksi akan diumumkan. Peserta didik yang diterima wajib melakukan daftar ulang dan pembayaran biaya sesuai jadwal.</li>
-                </ul>
-
-                <h5 class="font-weight-bold text-dark mt-4">Estimasi Biaya Pendidikan:</h5>
-                <p class="text-muted">Biaya pendaftaran dan sumbangan pengembangan institusi (SPI) bersifat satu kali bayar. Biaya SPP dibayarkan setiap bulan.</p>
-                <table class="table table-bordered table-sm mt-3">
-                <thead>
-                    <tr>
-                    <th scope="col">Jenis Biaya</th>
-                    <th scope="col">Estimasi Jumlah</th>
-                    <th scope="col">Keterangan</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                    <td>Biaya Pendaftaran</td>
-                    <td>Rp 250.000</td>
-                    <td>Satu kali bayar</td>
-                    </tr>
-                    <tr>
-                    <td>Sumbangan Pengembangan Institusi (SPI)</td>
-                    <td>Rp 1.500.000 - Rp 3.000.000</td>
-                    <td>Satu kali bayar (sesuai kesepakatan)</td>
-                    </tr>
-                    <tr>
-                    <td>SPP Bulanan</td>
-                    <td>Rp 300.000</td>
-                    <td>Dibayarkan setiap bulan</td>
-                    </tr>
-                    <tr>
-                    <td>Seragam Sekolah</td>
-                    <td>Estimasi Rp 750.000</td>
-                    <td>Terpisah, dapat dibeli di koperasi sekolah</td>
-                    </tr>
-                </tbody>
-                </table>
-                <p class="text-muted small mt-3">Estimasi biaya dapat berubah sewaktu-waktu. Informasi lebih lanjut dapat diperoleh langsung di sekretariat PPDB sekolah.</p>
-            </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-secondary rounded-pill btn-sm" data-dismiss="modal">Tutup</button>
-            </div>
-            </div>
-        </div>
-        </div>
-
-        <section id="pendaftaran" class="py-5 bg-primary">
-            <div class="container">
-                <div class="cta-section text-center text-white">
-                    <h2 class="font-weight-bold display-4">Pendaftaran Peserta Didik Baru (PPDB) Telah Dibuka!</h2>
-                    <p class="my-4 lead">Jadilah bagian dari keluarga besar SD Negeri Cicohag. Dapatkan pendidikan terbaik untuk masa depan putra-putri Anda. Kuota terbatas!</p>
-                    <a href="#" class="btn btn-light btn-lg font-weight-bold shadow-md rounded-pill px-4 py-2" data-toggle="modal" data-target="#registrationModal">Lihat Alur Pendaftaran & Biaya <i class="fas fa-external-link-alt ml-2"></i></a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-        <div class="modal fade" id="portalModal" tabindex="-1" role="dialog" aria-labelledby="portalModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-sm modal-dialog-centered" role="document"> <div class="modal-content rounded-xl shadow-lg border-0"> <div class="modal-header d-flex justify-content-between align-items-center border-0 pb-0">
-                <h5 class="modal-title font-weight-bolder text-primary text-center w-100" id="portalModalLabel">
-                    <i class="fas fa-sign-in-alt mr-2"></i> Masuk Sebagai
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body p-4 text-center"> <p class="text-muted mb-4">Silakan pilih peran Anda untuk melanjutkan ke portal.</p>
-                <div class="d-grid gap-3"> <a href="guru.html" class="btn btn-outline-primary btn-lg rounded-pill d-flex align-items-center justify-content-center mb-3"> <i class="fas fa-chalkboard-teacher fa-lg mr-3"></i> Portal Guru & Staf
-                </a>
-                <a href="ortu.html" class="btn btn-outline-primary btn-lg rounded-pill d-flex align-items-center justify-content-center"> <i class="fas fa-user-graduate fa-lg mr-3"></i> Portal Siswa
-                </a>
-                </div>
-            </div>
-            <div class="modal-footer border-0 pt-0 justify-content-center"> <button type="button" class="btn btn-link text-muted" data-dismiss="modal">Tutup</button>
-            </div>
-            </div>
-        </div>
-        </div>
-
-    <footer id="kontak" class="footer py-5 bg-dark text-white">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5 class="font-weight-bold text-secondary">SDN Cicohag</h5>
-                    <p class="text-light">Jln. Siliwangi No 355, Desa Padaasih, Kecamatan Cisaat, Kabupaten Sukabumi, 43152</p>
-                </div>
-                <div class="col-lg-4 mb-4 mb-lg-0">
-                    <h5 class="font-weight-bold text-secondary">Hubungi Kami</h5>
-                    <ul class="list-unstyled">
-                        <li><i class="fab fa-whatsapp fa-fw mr-2 text-secondary"></i> <a href="https://wa.me/6281234567890" class="text-light">0812-3456-7890</a></li>
-                        <li><i class="fas fa-envelope fa-fw mr-2 text-secondary"></i> <a href="mailto:sdncicohag49@gmail.com" class="text-light">sdncicohag49@gmail.com</a></li>
-                    </ul>
-                </div>
-                <div class="col-lg-4">
-                    <h5 class="font-weight-bold text-secondary">Ikuti Kami</h5>
-                    <a href="#" class="mr-3 text-secondary"><i class="fab fa-instagram fa-2x"></i></a>
-                    <a href="#" class="mr-3 text-secondary"><i class="fab fa-facebook-f fa-2x"></i></a>
-                    <a href="#" class="text-secondary"><i class="fab fa-youtube fa-2x"></i></a>
-                </div>
-            </div>
-            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-            <p class="text-center text-light mb-0">&copy; 2025 SD Negeri Cicohag. Dibuat dengan ❤️ untuk pendidikan.</p> </div>
-    </footer>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script>
-        // --- GANTI DENGAN KONFIGURASI FIREBASE ANDA ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyD4nAPhGV-USPyElTyHwiDZO0ZvUGRoK5E",
-            authDomain: "sistem-absensi-sdn-cicohag.firebaseapp.com",
-            projectId: "sistem-absensi-sdn-cicohag",
-            storageBucket: "sistem-absensi-sdn-cicohag.firebasestorage.app",
-            messagingSenderId: "540116242535",
-            appId: "1:540116242535:web:41e3e1e7456ecf1c6584c2"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        window.addEventListener('DOMContentLoaded', () => {
-            // News and Instagram sections removed as per request
-            // If you later implement automatic fetching, you can re-add them here.
-        });
-    </script>
+    </div>
 </body>
 </html>
