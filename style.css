@@ -1,0 +1,764 @@
+/* =================================================================
+   GAYA UTAMA & VARIABEL
+   ================================================================= */
+:root {
+    --primary-color: #0056b3; /* Biru yang lebih dalam dan profesional */
+    --secondary-color: #ffc107; /* Kuning sebagai aksen */
+    --light-bg: #f8f9fa; /* Latar belakang sangat terang */
+    --white-bg: #ffffff; /* Latar belakang putih murni */
+    --text-dark: #212529; /* Teks gelap */
+    --text-light: #6c757d; /* Teks abu-abu terang */
+    --border-radius-sm: 8px;   /* Radius kecil untuk elemen kompak */
+    --border-radius-md: 15px;  /* Radius sedang untuk kartu kecil */
+    --border-radius-lg: 20px;  /* Radius besar untuk kartu utama */
+    --border-radius-xl: 30px;  /* Radius ekstra besar untuk modal/elemen khusus */
+    --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);   /* Bayangan kecil dan lembut */
+    --shadow-md: 0 8px 25px rgba(0,0,0,0.08);   /* Bayangan sedang */
+    --shadow-lg: 0 15px 40px rgba(0,0,0,0.12);  /* Bayangan besar untuk kedalaman */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--white-bg); /* Menggunakan variabel */
+    color: var(--text-dark); /* Menggunakan variabel */
+}
+
+/* =================================================================
+   GAYA UNTUK LANDING PAGE (index.html)
+   ================================================================= */
+.navbar { 
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+    padding: 0.75rem 0; /* Padding vertikal sedikit lebih kecil */
+}
+.navbar-brand img {
+    border-radius: var(--border-radius-sm); /* Gambar logo dengan sudut membulat */
+}
+.navbar-nav .nav-link {
+    transition: all 0.2s ease; /* Transisi untuk hover link */
+}
+.navbar-nav .nav-link:hover {
+    background-color: var(--light-bg); /* Background saat hover */
+    color: var(--primary-color) !important; /* Pastikan warna teks berubah */
+}
+
+.navbar-nav .btn.btn-primary:hover {
+    color: var(--primary-color) !important; /* Teks tombol jadi warna primary saat hover */
+    background-color: var(--white-bg) !important; /* Background jadi putih saat hover */
+    border-color: var(--primary-color) !important; /* Border tetap primary */
+}
+
+/* Pastikan ikon di dalam tombol Portal juga berubah warna saat hover */
+.navbar-nav .btn.btn-primary:hover i {
+    color: var(--primary-color) !important; /* Ikon jadi warna primary saat hover */
+}
+
+.hero-section {
+    /* Meningkatkan opasitas overlay agar teks lebih mudah dibaca */
+    background: linear-gradient(rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.9)), /* Opasitas 0.9 agar lebih terang */
+                url('https://placehold.co/1920x1080/EAF2FF/333?text=Siswa-Siswi+Ceria') no-repeat center center;
+    background-size: cover;
+    padding: 100px 0; /* Padding atas bawah */
+}
+.hero-section h1 { 
+    font-weight: 800; 
+    font-size: 3.5rem; 
+    color: var(--primary-color); 
+}
+/* Tambahkan gaya untuk teks lead agar lebih mudah dibaca di atas background yang terang */
+.hero-section .lead { 
+    max-width: 700px; /* Lebar maksimum untuk keterbacaan */
+    margin: 1.5rem auto; 
+    font-size: 1.25rem; /* Ukuran font sedikit lebih besar */
+    color: var(--text-dark); /* Ganti menjadi warna teks gelap agar kontras */
+    /* Opsional: Tambah shadow teks jika masih sulit dibaca */
+    text-shadow: 0 1px 3px rgba(0,0,0,0.1); 
+}
+/* Tombol di hero section */
+.hero-section .btn-primary {
+    padding: 14px 35px; /* Padding lebih besar untuk tombol utama */
+    font-size: 1.1rem;
+    border-radius: 50px; /* Bentuk pill */
+}
+
+/* Umum untuk semua tombol primary */
+.btn-primary {
+    background-color: var(--primary-color); 
+    border-color: var(--primary-color);
+    font-weight: 600; 
+    transition: all 0.3s ease;
+}
+.btn-primary:hover { 
+    transform: translateY(-3px); 
+    box-shadow: var(--shadow-md); 
+    background-color: #004085; /* Sedikit lebih gelap saat hover */
+    border-color: #004085;
+}
+/* Untuk tombol outline */
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: var(--white-bg);
+    box-shadow: var(--shadow-sm);
+}
+.section-title { 
+    font-weight: 700; 
+    margin-bottom: 1rem; 
+    color: var(--primary-color); /* Pastikan judul section primary color */
+}
+.section-subtitle { 
+    color: var(--text-light); 
+    margin-bottom: 3rem; 
+    max-width: 800px; /* Batasi lebar subtitle */
+    margin-left: auto;
+    margin-right: auto;
+}
+.info-grid { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+    gap: 2rem; 
+}
+.info-card {
+    background: var(--white-bg); 
+    padding: 2.5rem; 
+    border-radius: var(--border-radius-lg); /* Menggunakan variabel */
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+    text-align: center; 
+    transition: all 0.3s ease;
+    border: 1px solid #eee; /* Tambahkan border tipis */
+}
+.info-card:hover { 
+    transform: translateY(-10px); 
+    box-shadow: var(--shadow-md); /* Konsisten dengan shadow-md */
+}
+.info-card .icon { 
+    font-size: 3rem; 
+    color: var(--primary-color); 
+    margin-bottom: 1.5rem; 
+}
+.program-section .row { 
+    align-items: center; 
+    margin-bottom: 3rem; /* Jarak antar blok program */
+}
+.program-section img { 
+    border-radius: var(--border-radius-md); /* Radius medium untuk gambar */
+    box-shadow: var(--shadow-md); /* Konsisten dengan shadow-md */
+}
+/* NEWS DAN INSTAGRAM SECTION DIHAPUS DARI HTML, JADI STYLENYA DIHAPUS */
+/* .news-card img { border-top-left-radius: var(--border-radius-lg); border-top-right-radius: var(--border-radius-lg); height: 220px; object-fit: cover; } */
+/* .instagram-section { background-color: var(--light-bg); } */
+/* .instagram-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1.5rem; } */
+/* .instagram-post { position: relative; overflow: hidden; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-soft); transition: transform 0.3s ease; } */
+/* .instagram-post:hover { transform: scale(1.05); } */
+/* .instagram-post img { width: 100%; height: 100%; object-fit: cover; } */
+
+.cta-section { 
+    background-color: var(--primary-color); 
+    color: white; 
+    border-radius: var(--border-radius-lg); 
+    padding: 4rem; 
+    box-shadow: var(--shadow-md); /* Tambahkan shadow konsisten */
+}
+.cta-section h2 { /* Gaya untuk H2 di CTA */
+    font-size: 2.5rem; /* Lebih besar */
+    margin-bottom: 1.5rem;
+}
+.cta-section p { /* Gaya untuk paragraf di CTA */
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+.cta-section .btn-light {
+    padding: 14px 40px;
+    border-radius: 50px; /* Bentuk pill */
+    font-size: 1.1rem;
+    color: var(--primary-color); /* Teks tombol light tetap primary */
+}
+.cta-section .btn-light:hover {
+    box-shadow: var(--shadow-lg); /* Shadow lebih kuat saat hover */
+    transform: translateY(-3px);
+}
+
+.footer { 
+    background-color: var(--text-dark); 
+    color: white; 
+    border-top: 5px solid var(--primary-color); /* Garis atas footer */
+}
+.footer h5 { 
+    color: var(--secondary-color); /* Judul di footer sekunder */
+}
+.footer a { 
+    color: var(--secondary-color); 
+    transition: all 0.2s ease;
+}
+.footer a:hover { 
+    color: var(--white-bg); /* Teks putih saat hover */
+    text-decoration: none;
+}
+.footer .fab, .footer .fas { /* Ikon di footer */
+    color: var(--secondary-color);
+}
+.footer .fab:hover, .footer .fas:hover {
+    color: var(--white-bg);
+}
+
+
+/* =================================================================
+   MODAL BARU (Kurikulum, Fasilitas, Pendaftaran, Portal)
+   ================================================================= */
+.modal-content.rounded-xl { /* Custom class untuk rounded lebih besar */
+    border-radius: var(--border-radius-xl) !important;
+}
+.modal-header, .modal-footer {
+    border-color: #eee !important; /* Border yang lebih halus */
+}
+.modal-title {
+    font-size: 1.5rem; /* Ukuran judul modal */
+}
+.modal-body .list-unstyled li { /* Item list di modal */
+    padding: 8px 0;
+    font-size: 1.05rem;
+    color: var(--text-dark);
+}
+.modal-body .list-unstyled li i {
+    font-size: 1.2rem;
+}
+.modal-body p.text-muted.small {
+    font-size: 0.85rem;
+}
+
+/* Tombol pilihan di Modal Portal */
+.modal-body .btn-outline-primary.btn-lg {
+    padding: 15px 25px;
+    font-size: 1.15rem;
+    border-width: 2px; /* Border lebih tebal */
+    border-radius: 50px; /* Bentuk pill */
+}
+.modal-body .btn-outline-primary.btn-lg:hover {
+    box-shadow: var(--shadow-sm); /* Efek shadow saat hover */
+}
+.modal-body .btn-link { /* Tombol tutup di modal footer */
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+.modal-body .btn-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+
+/* =================================================================
+   GAYA UNTUK PORTAL (guru.html, ortu.html, arsip.html)
+   ================================================================= */
+.portal-body {
+    background-color: var(--light-bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Tambahkan ini untuk memusatkan login-container di halaman login */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Wrapper untuk Sidebar dan Konten */
+.wrapper {
+    display: none; /* Default tersembunyi */
+    width: 100%;
+    align-items: stretch;
+    min-height: 100vh;
+    /* Saat wrapper aktif, ia akan mengisi layar dan body akan menyesuaikan */
+}
+
+#login-container {
+    /* Gaya kartu sudah ada di HTML, tapi kita bisa pastikan marginnya auto untuk horizontal center */
+    margin-left: auto;
+    margin-right: auto;
+    /* Anda sudah punya max-width dan width:100% di HTML inline style */
+}
+
+/* --- Sidebar --- */
+#sidebar {
+    min-width: 250px;
+    max-width: 250px;
+    background: var(--primary-color);
+    color: #fff;
+    transition: all 0.3s;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 1000;
+    box-shadow: var(--shadow-md); /* Konsisten dengan shadow-md */
+    padding-top: 20px;
+}
+
+#sidebar.active {
+    margin-left: -250px;
+}
+
+#sidebar .sidebar-header {
+    padding: 20px;
+    background: #004d9e;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+#sidebar .sidebar-header h3 {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+#sidebar ul.components {
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+#sidebar ul li a {
+    padding: 10px 20px;
+    font-size: 1.1em;
+    display: block;
+    color: rgba(255,255,255,0.8);
+    transition: all 0.3s;
+}
+
+#sidebar ul li a:hover {
+    color: var(--secondary-color);
+    background: #004085;
+    text-decoration: none;
+}
+
+#sidebar ul li.active > a, a[aria-expanded="true"] {
+    color: #fff;
+    background: #004085;
+}
+
+#sidebar ul li a i {
+    margin-right: 10px;
+}
+
+#sidebar ul ul a {
+    font-size: 0.9em !important;
+    padding-left: 30px !important;
+    background: #003366;
+    color: rgba(255,255,255,0.7);
+}
+
+#sidebar ul ul a:hover {
+    background: #002244;
+    color: var(--secondary-color);
+}
+
+.CTAs {
+    padding: 20px;
+    text-align: center;
+}
+
+.CTAs .logout-btn {
+    background: #dc3545;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: var(--border-radius-sm); /* Menggunakan variabel */
+    transition: all 0.3s;
+}
+.CTAs .logout-btn:hover {
+    background: #c82333;
+    color: #fff;
+    text-decoration: none;
+}
+
+
+/* --- Page Content --- */
+#content {
+    width: 100%;
+    padding: 20px;
+    min-height: 100vh;
+    transition: all 0.3s;
+    margin-left: 250px;
+    padding-top: 70px;
+    position: relative;
+}
+
+#content.active {
+    margin-left: 0;
+}
+
+/* Navbar Top (untuk tombol toggle dan welcome message) */
+.custom-navbar-top {
+    position: fixed;
+    width: calc(100% - 250px);
+    top: 0;
+    left: 250px;
+    z-index: 999;
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+    padding: 0.75rem 1rem;
+    background-color: var(--white-bg) !important;
+    border-bottom-left-radius: var(--border-radius-sm); /* Radius kecil untuk navbar bottom-left */
+    transition: width 0.3s, left 0.3s;
+}
+
+.custom-navbar-top.active {
+    width: 100% !important;
+    left: 0 !important;
+    border-radius: 0;
+}
+
+.navbar-text strong {
+    color: var(--primary-color);
+}
+
+.portal-content-area {
+    padding-top: 20px;
+}
+
+/* Gaya opsional untuk Nav Pills Rekap Semester */
+#semester-selection-card {
+    background-color: var(--white-bg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-soft); /* Menggunakan variabel */
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+#semesterPills .nav-link {
+    font-weight: 600;
+    color: var(--primary-color);
+    border-radius: var(--border-radius-sm); /* Radius kecil */
+    padding: 10px 15px;
+    margin: 0 5px;
+}
+
+#semesterPills .nav-link.active {
+    background-color: var(--primary-color) !important;
+    color: white !important;
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+}
+
+#semesterPills .nav-link:not(.active):hover {
+    background-color: var(--light-bg);
+    color: var(--primary-color);
+}
+
+.tab-content .tab-pane {
+    padding: 0;
+}
+
+/* Pastikan tabel di dalam rekap konten tetap terlihat bagus */
+#rekap-content-semester1 .card,
+#rekap-content-semester2 .card {
+    margin-top: 1.5rem;
+}
+
+/* Responsivitas untuk tombol tab di layar kecil */
+@media (max-width: 576px) {
+    #semesterPills {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #semesterPills .nav-item {
+        width: 100%;
+        margin: 0 0 8px 0;
+    }
+    #semesterPills .nav-link {
+        text-align: center;
+    }
+}
+
+/* =================================================================
+   GAYA UNTUK ELEMEN SPESIFIK LAINNYA (DARI KODE ANDA SEBELUMNYA)
+   ================================================================= */
+.student-name { cursor: pointer; color: #007bff; text-decoration: none !important; }
+.student-name:hover { color: #0056b3; }
+.details-row > td { padding: 0 !important; background-color: #e9ecef !important; border: none !important; }
+.details-content { padding: 1rem; }
+.back-link-container { text-align: center; margin-bottom: 10px; }
+.card-title-centered { text-align: center; }
+#scan-modal .modal-dialog { max-width: 95%; }
+#reader { width: 100%; border: 5px solid #fff; border-radius: var(--border-radius-md); box-shadow: var(--shadow-md); } /* Menggunakan variabel */
+
+
+/* =================================================================
+   GAYA REVISI TOTAL UNTUK QUICK DASHBOARD (DIREVISI)
+   ================================================================= */
+.quick-summary-card {
+    background-color: var(--white-bg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid #e9ecef;
+}
+
+.quick-summary-card .summary-title {
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quick-summary-card .summary-date {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.summary-metrics {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.metric-item {
+    text-align: center;
+    padding: 10px 15px;
+    border-radius: var(--border-radius-sm); /* Radius kecil */
+    flex: 1 1 120px;
+    min-width: 100px;
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+    border: 1px solid #f0f0f0;
+}
+
+.metric-item .metric-value {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+
+.metric-item .metric-label {
+    display: block;
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+/* Warna untuk setiap metrik */
+.metric-item.present .metric-value { color: #28a745; }
+.metric-item.return .metric-value { color: #6f42c1; }
+.metric-item.sick .metric-value { color: #ffc107; }
+.metric-item.permission .metric-value { color: #17a2b8; }
+.metric-item.absent .metric-value { color: #dc3545; }
+.metric-item.pending .metric-value { color: #6c757d; }
+
+/* Class Details Accordion */
+.class-details-card {
+    background-color: var(--white-bg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+    padding: 1.5rem;
+    border: 1px solid #e9ecef;
+}
+
+.class-details-card .summary-title {
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    font-size: 1.25rem;
+}
+
+.class-accordion-item {
+    border: none !important;
+    margin-bottom: 10px;
+    border-radius: var(--border-radius-md) !important; /* Radius medium */
+    overflow: hidden;
+    box-shadow: var(--shadow-sm); /* Konsisten dengan shadow-sm */
+}
+
+.class-accordion-item .card-header {
+    background-color: #f0f8ff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0 !important; /* Radius medium di sudut atas */
+}
+
+.class-accordion-item .card-header button {
+    font-weight: 600;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.class-accordion-item .card-header button:hover {
+    color: #004085;
+}
+
+.class-accordion-item .card-header button .badge {
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 0.8em;
+    padding: 0.4em 0.7em;
+    border-radius: 15px;
+}
+
+.class-accordion-item .accordion-icon {
+    transition: transform 0.3s ease-in-out;
+}
+
+.class-accordion-item .card-header button[aria-expanded="true"] .accordion-icon {
+    transform: rotate(180deg);
+}
+
+.class-accordion-item .card-body {
+    padding: 1.25rem;
+    background-color: #fdfdfd;
+    border-radius: 0 0 var(--border-radius-md) var(--border-radius-md) !important; /* Radius medium di sudut bawah */
+}
+
+.compact-metrics {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.compact-metrics .metric-item {
+    flex: 1 1 80px;
+    padding: 8px;
+    border-radius: var(--border-radius-sm); /* Radius kecil */
+    box-shadow: none;
+    border: 1px solid #eee;
+}
+
+.compact-metrics .metric-item .metric-value {
+    font-size: 1.3rem;
+}
+
+.compact-metrics .metric-item .metric-label {
+    font-size: 0.75rem;
+}
+
+/* =================================================================
+   RESPONSIVITAS UNTUK LAYAR KECIL (MOBILE) - DIKONSOLIDASI
+   ================================================================= */
+@media (max-width: 768px) {
+    #sidebar {
+        margin-left: -250px;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+    #sidebar.active ~ #sidebar-overlay {
+        display: block;
+    }
+    #content.active .custom-navbar-top { 
+        z-index: 980 !important;
+    }
+    #sidebar-overlay {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        display: none;
+    }
+    #content {
+        width: 100%;
+        margin-left: 0;
+        padding-top: 70px;
+    }
+    #content.active {
+        position: relative;
+        overflow: hidden;
+    }
+    #content.active::before {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 998;
+        cursor: pointer;
+    }
+    .custom-navbar-top {
+        width: 100% !important;
+        left: 0 !important;
+        border-radius: 0;
+        padding-left: 60px !important;
+    }
+    #sidebarCollapse {
+        display: block;
+    }
+    #sidebarCollapse span {
+        display: none;
+    }
+
+    .summary-metrics {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 10px;
+    }
+    .metric-item {
+        flex: 1 1 calc(50% - 10px);
+        max-width: calc(50% - 10px);
+        margin-bottom: 0;
+        padding: 8px 10px;
+        border-radius: var(--border-radius-sm);
+        font-size: 0.9em;
+    }
+    .metric-item .metric-value {
+        font-size: 1.5rem;
+    }
+    .metric-item .metric-label {
+        font-size: 0.8rem;
+    }
+    .compact-metrics {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    .compact-metrics .metric-item {
+        flex: 1 1 45%;
+    }
+
+    #semesterPills {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #semesterPills .nav-item {
+        width: 100%;
+        margin: 0 0 8px 0;
+    }
+    #semesterPills .nav-link {
+        text-align: center;
+    }
+}
+
+
+/* =================================================================
+   FIX: TOMBOL TOGGLE SIDEBAR DI MOBILE (PERBAIKAN ANIMASI)
+   ================================================================= */
+.toggle-button-fixed {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    background-color: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: white !important;
+    padding: 8px 12px;
+    border-radius: var(--border-radius-sm); /* Menggunakan variabel */
+    box-shadow: var(--shadow-sm); /* Menggunakan variabel */
+    transition: left 0.3s ease;
+}
+
+#sidebar.active + #content .toggle-button-fixed {
+    left: 265px;
+}
