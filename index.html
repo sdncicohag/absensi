@@ -23,18 +23,31 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--light-bg);
+            padding-top: 80px; /* PERBAIKAN: Memberi ruang untuk navbar */
+        }
+
+        .custom-navbar {
+            background-color: var(--light-bg) !important;
+            box-shadow: var(--shadow-sm);
         }
 
         .portal-card {
-            transition: transform 0.2s, box-shadow 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
             border: none;
             border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-sm);
+            background-color: var(--white-bg);
         }
 
         .portal-card:hover {
             transform: translateY(-5px);
             box-shadow: var(--shadow-md) !important;
+        }
+
+        .portal-card:active {
+            transform: translateY(-2px) scale(0.98);
+            box-shadow: var(--shadow-sm) !important;
+            background-color: #e9ecef;
         }
 
         .portal-icon {
@@ -50,45 +63,46 @@
         .portal-card .text-success .fa-user-graduate { color: #28a745; }
         .portal-card .text-warning .fa-user-shield { color: var(--secondary-color); }
 
-        /* --- PERBAIKAN UNTUK MOBILE --- */
         @media (max-width: 576px) {
+            body {
+                padding-top: 70px; /* Menyesuaikan padding untuk navbar mobile */
+            }
             .main-container {
-                align-items: flex-start !important;
-                padding-top: 4rem; /* Menambah jarak dari atas */
+                padding-top: 2rem;
                 padding-bottom: 4rem;
                 min-height: auto;
             }
-            .main-title {
-                font-size: 1.75rem;
-            }
-            .text-center.mb-5 {
-                margin-bottom: 2.5rem !important; /* Menambah jarak di bawah judul */
-            }
             .portal-card .card-body {
-                padding: 1.25rem; /* Mengurangi padding di dalam kartu */
+                padding: 1.25rem;
             }
             .portal-icon {
-                font-size: 2rem; /* Mengecilkan ikon */
+                font-size: 2rem;
                 margin-bottom: 0.5rem;
             }
             .portal-card .card-title {
-                font-size: 1.05rem; /* Mengecilkan judul kartu */
+                font-size: 1.05rem;
             }
             .portal-card .card-text {
-                font-size: 0.85rem; /* Mengecilkan teks deskripsi */
+                font-size: 0.85rem;
             }
         }
 
     </style>
 </head>
 <body>
+    <!-- PERBAIKAN: Navbar baru yang sticky -->
+    <nav class="navbar navbar-light fixed-top custom-navbar">
+        <div class="container justify-content-center">
+            <a class="navbar-brand text-center" href="#">
+                <h5 class="font-weight-bolder text-dark main-title mb-0">Sistem Informasi Sekolah</h5>
+                <span class="text-muted small">SD Negeri Cicohag</span>
+            </a>
+        </div>
+    </nav>
+
     <div class="container">
-        <div class="row justify-content-center align-items-center main-container" style="min-height: 100vh;">
+        <div class="row justify-content-center align-items-center main-container" style="min-height: calc(100vh - 80px);">
             <div class="col-lg-10 col-xl-9">
-                <div class="text-center mb-5">
-                    <h1 class="font-weight-bolder text-dark main-title">Sistem Informasi Sekolah</h1>
-                    <p class="lead text-muted">SD Negeri Cicohag</p>
-                </div>
                 <div class="row justify-content-center">
                     <!-- Portal Guru & Staf -->
                     <div class="col-md-4 col-9 mb-4">
