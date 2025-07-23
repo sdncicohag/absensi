@@ -7,73 +7,151 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        body {
+            background-color: #f4f7f9; /* Sedikit abu-abu untuk latar */
+        }
+        .portal-body {
+            /* Dihapus untuk memungkinkan navbar sticky */
+        }
+        .main-container {
+            transition: all 0.3s ease-in-out;
+        }
+        .login-logo {
+            max-width: 100px;  /* Atur batas lebar maksimal */
+            max-height: 80px; /* Atur batas tinggi maksimal */
+            width: auto;
+            height: auto;
+        }
+        .input-group-text {
+            background-color: #e9ecef;
+            border-right: none;
+        }
+        .input-group .form-control {
+            border-left: none;
+        }
+        .input-group .form-control:focus {
+            box-shadow: none !important;
+            border-color: #ced4da;
+        }
+        /* Style untuk layar kecil (mobile) */
+        @media (max-width: 767.98px) {
+            .card-mobile-flat {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                background-color: transparent !important;
+            }
+            .card-mobile-flat .card-body {
+                padding: 0 !important;
+            }
+            
+            /* REVISI: Kode untuk memperkecil font di mobile */
+            #welcome-message-siswa {
+                font-size: 1rem; /* Ukuran asli h4 adalah 1.5rem */
+            }
+        }
+    </style>
 </head>
-<body class="portal-body">
-    <div class="container d-flex justify-content-center align-items-center min-vh-100">
-        <div id="login-container" class="card shadow-lg border-0 rounded-xl p-4 p-md-5 mx-auto" style="max-width: 500px; width: 100%;"> 
+<body>
+        <nav id="portal-navbar" class="navbar navbar-light bg-white shadow-sm sticky-top" style="display: none;">
+            <div class="container d-flex align-items-center" style="max-width: 800px;">
+                <h4 id="welcome-message-siswa" class="navbar-brand mb-0 font-weight-bolder text-primary text-truncate" style="min-width: 0;"></h4>
+                
+                <button id="logoutButtonSiswa" class="btn btn-light ml-auto" title="Logout">
+                    <i class="fas fa-sign-out-alt text-danger fa-lg"></i>
+                </button>
+            </div>
+        </nav>
+
+    <div id="main-content-wrapper" class="container d-flex justify-content-center align-items-center min-vh-100">
+        
+    <div id="login-container" class="card shadow-lg border-0 rounded-xl p-4 p-md-5 mx-auto" style="max-width: 450px; width: 100%;"> 
             <div class="card-body">
-                <div class="back-link-container text-center mb-4">
-                    <a href="index.html" class="text-muted text-decoration-none d-inline-flex align-items-center">
-                        <i class="fas fa-arrow-left mr-2"></i> Kembali ke Halaman Utama
-                    </a>
+                <div class="text-center mb-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Lambang_Kab_Sukabumi.svg/1200px-Lambang_Kab_Sukabumi.svg.png" alt="Logo Sekolah" class="login-logo mb-2">
+                    <h4 class="card-title text-primary font-weight-bolder">
+                        Login Siswa & Orang Tua
+                    </h4>
+                    <p class="text-muted">SD Negeri Cicohag</p>
                 </div>
-                <h3 class="card-title-centered text-primary font-weight-bolder mb-4">
-                    <i class="fas fa-user-graduate mr-2"></i> Portal Siswa & Orang Tua
-                </h3>
-                <p class="text-center text-muted mb-4">Silakan login untuk melihat rekap kehadiran.</p>
+                
                 <form id="loginFormSiswa">
                     <div class="form-group mb-3">
-                        <label for="nisn" class="font-weight-bold text-dark">Nomor Induk Siswa Nasional (NISN):</label>
-                        <input type="text" id="nisn" name="nisn" class="form-control form-control-lg rounded-pill px-4" placeholder="Masukkan NISN Anda" required>
+                        <label for="nisn" class="font-weight-bold text-dark small">NISN</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            </div>
+                            <input type="text" id="nisn" name="nisn" class="form-control form-control-lg" placeholder="Masukkan NISN" required>
+                        </div>
                     </div>
+                    
                     <div class="form-group mb-4">
-                        <label for="tglLahir" class="font-weight-bold text-dark">Tanggal Lahir (Format: DDMMYYYY):</label>
-                        <input type="text" id="tglLahir" name="tglLahir" class="form-control form-control-lg rounded-pill px-4" placeholder="Contoh: 05082010" required>
+                        <label for="tglLahir" class="font-weight-bold text-dark small">Password</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            </div>
+                            <input type="password" id="tglLahir" name="tglLahir" class="form-control form-control-lg" placeholder="Masukkan Password" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </span>
+                            </div>
+                        </div>
                     </div>
-                    <button type="submit" id="loginButton" class="btn btn-primary btn-lg btn-block rounded-pill shadow-md font-weight-bold mt-4">
+                    
+                    <button type="submit" id="loginButton" class="btn btn-primary btn-lg btn-block font-weight-bold mt-4">
                         Login <i class="fas fa-sign-in-alt ml-2"></i>
                     </button> 
                     <div id="login-error" class="alert alert-danger mt-3 text-center" style="display:none;"></div>
                 </form>
+
+                <div class="text-center mt-4">
+                    <a href="index.html" class="text-muted small">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Halaman Utama
+                    </a>
+                </div>
             </div>
         </div>
+        
 
-        <div id="rekap-container" class="card shadow-lg border-0 rounded-xl p-4 p-md-5 mx-auto" style="display:none; max-width: 800px; width: 100%;"> 
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h4 id="welcome-message-siswa" class="text-primary font-weight-bolder"></h4>
-                    <button id="logoutButtonSiswa" class="btn btn-sm btn-outline-danger rounded-pill"><i class="fas fa-sign-out-alt mr-2"></i> Logout</button>
+        <div id="rekap-container" style="display:none; max-width: 800px; width: 100%; padding-top: 1.5rem; padding-bottom: 1.5rem;"> 
+            <div class="text-center mb-4">
+                <button id="showJadwalBtn" class="btn btn-info rounded-pill shadow-sm px-4">
+                    <i class="fas fa-clipboard-list mr-2"></i>Lihat Info & Jadwal Kelas
+                </button>
+            </div>
+
+            <div class="text-center mb-4">
+                <div class="btn-group" role="group" aria-label="Pilih Semester">
+                    <button type="button" class="btn btn-primary semester-btn" onclick="fetchRekapSiswa(1)">Semester 1</button>
+                    <button type="button" class="btn btn-outline-primary semester-btn" onclick="fetchRekapSiswa(2)">Semester 2</button>
                 </div>
-                
-                <!-- Navigasi Tab Utama -->
-                <ul class="nav nav-tabs nav-fill mb-4" id="mainTab" role="tablist">
-                    <li class="nav-item">
-                        <a class="nav-link active" id="rekap-tab" data-toggle="tab" href="#rekapContent" role="tab" aria-controls="rekapContent" aria-selected="true">Rekap Kehadiran</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" id="jadwal-tab" data-toggle="tab" href="#jadwalContent" role="tab" aria-controls="jadwalContent" aria-selected="false">Info & Jadwal Kelas</a>
-                    </li>
-                </ul>
+            </div>
+            
+            <div id="content-container" class="mt-3"></div>
+        </div>
+            
+            <div id="content-container" class="mt-3"></div>
+        </div>
+    </div>
 
-                <!-- Konten Tab -->
-                <div class="tab-content" id="mainTabContent">
-                    <!-- Tab Rekap Kehadiran -->
-                    <div class="tab-pane fade show active" id="rekapContent" role="tabpanel" aria-labelledby="rekap-tab">
-                        <h5 class="card-title text-center text-dark font-weight-bold mb-3">Pilih Semester</h5>
-                        <div class="d-flex justify-content-center mb-4">
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-primary rounded-pill px-4 py-2 mx-2 font-weight-bold" onclick="fetchRekapSiswa(1)">Semester 1 (Juli - Des)</button>
-                                <button class="btn btn-outline-primary rounded-pill px-4 py-2 mx-2 font-weight-bold" onclick="fetchRekapSiswa(2)">Semester 2 (Jan - Juni)</button>
-                            </div>
-                        </div>
-                        <div id="content-container" class="mt-3"></div>
+    <div class="modal fade" id="jadwalModal" tabindex="-1" role="dialog" aria-labelledby="jadwalModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="jadwalModalLabel"><i class="fas fa-clipboard-list mr-2"></i> Info & Jadwal Kelas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="jadwalModalBody">
                     </div>
-                    <!-- Tab Info & Jadwal -->
-                    <div class="tab-pane fade" id="jadwalContent" role="tabpanel" aria-labelledby="jadwal-tab">
-                        <div id="jadwal-container" class="mt-3"></div>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
                 </div>
             </div>
         </div>
@@ -99,10 +177,27 @@
     const db = firebase.firestore();
 
     let currentSiswa = null;
+    
+    // REVISI: Pemilihan elemen-elemen baru
+    const mainContentWrapper = document.getElementById('main-content-wrapper');
+    const portalNavbar = document.getElementById('portal-navbar');
     const loginContainer = document.getElementById('login-container');
     const rekapContainer = document.getElementById('rekap-container');
     const welcomeMessage = document.getElementById('welcome-message-siswa');
     const contentContainer = document.getElementById('content-container');
+    // Logika untuk fitur Lihat/Sembunyikan Password
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('tglLahir');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    togglePassword.addEventListener('click', function () {
+        // Cek tipe input
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        // Ganti ikon mata
+        toggleIcon.classList.toggle('fa-eye-slash');
+    });
 
     document.getElementById('loginFormSiswa').addEventListener('submit', async function(e) {
         e.preventDefault();
@@ -117,18 +212,18 @@
 
         try {
             const snapshot = await db.collection('siswa').where('nisn', '==', nisn).where('tglLahir', '==', tglLahir).where('status', '==', 'Aktif').get();
-            if (snapshot.empty) throw new Error("NISN atau Tanggal Lahir salah, atau siswa tidak aktif.");
+            if (snapshot.empty) throw new Error("NISN atau Password salah, atau siswa tidak aktif.");
             
             const siswaData = snapshot.docs[0].data();
             currentSiswa = { nisn: nisn, tglLahir: tglLahir, nama: siswaData.nama, kelas: siswaData.kelas };
             
+            // REVISI: Logika untuk menampilkan navbar & konten rekap
             loginContainer.style.display = 'none';
-            rekapContainer.style.display = 'block';
-            
+            portalNavbar.style.display = 'flex'; // Tampilkan navbar
+            rekapContainer.style.display = 'block'; // Tampilkan konten rekap
+            mainContentWrapper.classList.remove('align-items-center', 'min-vh-100'); // Hapus centering vertikal
+
             welcomeMessage.innerHTML = `Selamat Datang, <strong>${currentSiswa.nama}</strong>!`;
-
-            Toastify({ text: `Selamat datang kembali, ${currentSiswa.nama}!`, duration: 3000, gravity: "top", position: "center", style: { background: "#4CAF50" } }).showToast();
-
             await fetchRekapSiswa(1); 
 
         } catch (error) {
@@ -136,26 +231,42 @@
             loginError.style.display = 'block';
         } finally {
             loginButton.disabled = false;
-            loginButton.innerHTML = 'Login';
+            loginButton.innerHTML = 'Login <i class="fas fa-sign-in-alt ml-2"></i>';
         }
     });
     
     document.getElementById('logoutButtonSiswa').addEventListener('click', () => {
         currentSiswa = null;
+        
+        // REVISI: Logika untuk menyembunyikan navbar & konten rekap, lalu menampilkan login
+        portalNavbar.style.display = 'none';
         rekapContainer.style.display = 'none';
         loginContainer.style.display = 'block';
+        mainContentWrapper.classList.add('align-items-center', 'min-vh-100'); // Kembalikan centering vertikal
+
         contentContainer.innerHTML = '';
-        document.getElementById('jadwal-container').innerHTML = '';
+        document.getElementById('jadwalModalBody').innerHTML = '';
         document.getElementById('loginFormSiswa').reset();
     });
 
-    // --- Event listener untuk tab Jadwal ---
-    document.getElementById('jadwal-tab').addEventListener('click', fetchInfoJadwal);
+    document.getElementById('showJadwalBtn').addEventListener('click', fetchInfoJadwal);
+
+    // REVISI: Logika logout kembali sederhana untuk satu tombol
+    document.getElementById('logoutButtonSiswa').addEventListener('click', () => {
+        currentSiswa = null;
+        portalNavbar.style.display = 'none';
+        rekapContainer.style.display = 'none';
+        loginContainer.style.display = 'block';
+        mainContentWrapper.classList.add('align-items-center', 'min-vh-100');
+        contentContainer.innerHTML = '';
+        document.getElementById('jadwalModalBody').innerHTML = '';
+        document.getElementById('loginFormSiswa').reset();
+    }); 
 
     async function fetchRekapSiswa(semester) {
         contentContainer.innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p class="text-muted">Memuat rekap semester...</p></div>';
         
-        document.querySelectorAll('.btn-group button').forEach((btn, index) => {
+        document.querySelectorAll('.semester-btn').forEach((btn, index) => {
             btn.classList.toggle('btn-primary', index + 1 === semester);
             btn.classList.toggle('btn-outline-primary', index + 1 !== semester);
         });
@@ -196,10 +307,11 @@
     }
 
     async function fetchInfoJadwal() {
-        const jadwalContainer = document.getElementById('jadwal-container');
-        if (jadwalContainer.innerHTML.trim() !== '') return; // Jangan fetch ulang jika sudah ada isinya
-
-        jadwalContainer.innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p class="text-muted">Memuat info & jadwal...</p></div>';
+        const modalBody = document.getElementById('jadwalModalBody');
+        
+        // Selalu tampilkan spinner dan fetch ulang agar data selalu terbaru
+        modalBody.innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p class="text-muted">Memuat info & jadwal...</p></div>';
+        $('#jadwalModal').modal('show');
 
         try {
             const docRef = db.collection('info_kelas').doc(currentSiswa.kelas);
@@ -207,44 +319,48 @@
             const data = docSnap.exists ? docSnap.data() : {};
             renderInfoJadwal(data);
         } catch (error) {
-            jadwalContainer.innerHTML = `<div class="alert alert-danger">Gagal memuat jadwal: ${error.message}</div>`;
+            modalBody.innerHTML = `<div class="alert alert-danger">Gagal memuat jadwal: ${error.message}</div>`;
         }
     }
 
     function renderInfoJadwal(data) {
-        const jadwalContainer = document.getElementById('jadwal-container');
+        const modalBody = document.getElementById('jadwalModalBody');
         const parseData = (textData) => {
-            if (!textData) return '<li>Belum ada data.</li>';
-            return textData.split('\n').map(item => `<li class="list-group-item">${item}</li>`).join('');
+            if (!textData || textData.trim() === '') {
+                return '<p class="text-muted text-center p-3">Informasi belum ditambahkan oleh wali kelas.</p>';
+            }
+            // Mengganti newline menjadi list item HTML
+            return `<ul class="list-group list-group-flush">${textData.split('\n').map(item => `<li class="list-group-item">${item.trim()}</li>`).join('')}</ul>`;
         };
 
-        jadwalContainer.innerHTML = `
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100"><div class="card-body">
-                        <h6 class="card-title font-weight-bold"><i class="fas fa-book-open mr-2"></i>Jadwal Pelajaran</h6>
-                        <ul class="list-group list-group-flush">${parseData(data.pelajaran)}</ul>
-                    </div></div>
+        modalBody.innerHTML = `
+            <ul class="nav nav-pills nav-fill mb-3" id="jadwalTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="pelajaran-tab-modal" data-toggle="pill" href="#pelajaran-content-modal" role="tab">Pelajaran</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="piket-tab-modal" data-toggle="pill" href="#piket-content-modal" role="tab">Piket</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="seragam-tab-modal" data-toggle="pill" href="#seragam-content-modal" role="tab">Seragam</a>
+                </li>
+            </ul>
+            <div class="tab-content mt-3">
+                <div class="tab-pane fade show active" id="pelajaran-content-modal" role="tabpanel">
+                    ${parseData(data.pelajaran)}
                 </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100"><div class="card-body">
-                        <h6 class="card-title font-weight-bold"><i class="fas fa-broom mr-2"></i>Jadwal Piket</h6>
-                        <ul class="list-group list-group-flush">${parseData(data.piket)}</ul>
-                    </div></div>
+                <div class="tab-pane fade" id="piket-content-modal" role="tabpanel">
+                    ${parseData(data.piket)}
                 </div>
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100"><div class="card-body">
-                        <h6 class="card-title font-weight-bold"><i class="fas fa-tshirt mr-2"></i>Jadwal Seragam</h6>
-                        <ul class="list-group list-group-flush">${parseData(data.seragam)}</ul>
-                    </div></div>
+                <div class="tab-pane fade" id="seragam-content-modal" role="tabpanel">
+                    ${parseData(data.seragam)}
                 </div>
-            </div>`;
+            </div>
+        `;
     }
 
     function getBadgeClass(status) {
         switch (status) {
-            case 'Hadir': case 'Masuk': return 'badge-success'; 
-            case 'Pulang': return 'badge-primary'; 
             case 'Sakit': return 'badge-warning'; 
             case 'Izin': return 'badge-info'; 
             case 'Tanpa Keterangan': case 'Alfa': return 'badge-danger'; 
@@ -252,48 +368,65 @@
         }
     }
 
-    function renderRekapSiswa(data, semester) {
-        data.detail.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+function renderRekapSiswa(data, semester) {
+    data.detail.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-        let html = `
-            <div class="card mt-4 shadow-sm rounded-lg">
-                <div class="card-body">
-                    <h5 class="card-title text-primary font-weight-bold"><i class="fas fa-chart-bar mr-2"></i> Rekap Kehadiran Semester ${semester}</h5>
-                    <p class="text-muted small mb-3">Untuk Ananda ${data.nama} (Kelas ${data.kelas})</p>
-                    <div class="summary-metrics d-flex justify-content-around flex-wrap mb-4">
-                        <div class="metric-item sick">
-                            <span class="metric-value">${data.total.sakit}</span>
-                            <span class="metric-label">Hari Sakit</span>
-                        </div>
-                        <div class="metric-item permission">
-                            <span class="metric-value">${data.total.izin}</span>
-                            <span class="metric-label">Hari Izin</span>
-                        </div>
-                        <div class="metric-item absent">
-                            <span class="metric-value">${data.total.alpha}</span>
-                            <span class="metric-label">Hari Alfa</span>
+    // DESAIN KARTU BARU UNTUK STATISTIK
+    let html = `
+        <div class="card shadow-sm rounded-xl card-mobile-flat">
+            <div class="card-body">
+                <h5 class="card-title text-primary font-weight-bold"><i class="fas fa-chart-bar mr-2"></i> Rekap Semester ${semester}</h5>
+                <p class="text-muted small mb-4">Untuk Ananda ${data.nama} (Kelas ${data.kelas})</p>
+                
+                <div class="row text-center no-gutters mb-4">
+                    <div class="col-4 px-1">
+                        <div class="p-3 rounded-lg" style="background-color: #fff8e1;">
+                            <h4 class="font-weight-bolder text-warning mb-1">${data.total.sakit}</h4>
+                            <p class="small font-weight-bold text-secondary mb-0">Sakit</p>
                         </div>
                     </div>
-                    <hr>
-                    <h6 class="mt-4 text-dark font-weight-bold"><i class="fas fa-list-alt mr-2"></i> Rincian Ketidakhadiran</h6>`;
+                    <div class="col-4 px-1">
+                        <div class="p-3 rounded-lg" style="background-color: #e3f2fd;">
+                             <h4 class="font-weight-bolder text-info mb-1">${data.total.izin}</h4>
+                             <p class="small font-weight-bold text-secondary mb-0">Izin</p>
+                        </div>
+                    </div>
+                    <div class="col-4 px-1">
+                        <div class="p-3 rounded-lg" style="background-color: #fbe9e7;">
+                             <h4 class="font-weight-bolder text-danger mb-1">${data.total.alpha}</h4>
+                             <p class="small font-weight-bold text-secondary mb-0">Alfa</p>
+                        </div>
+                    </div>
+                </div>
 
-        if (data.detail && data.detail.length > 0) {
-            html += `<div class="table-responsive"><table class="table table-sm table-striped table-hover mt-3"><thead><tr><th>Tanggal</th><th>Status</th></tr></thead><tbody>`;
-            data.detail.forEach(d => {
-                const badgeClass = getBadgeClass(d.status);
-                const formattedDate = new Date(d.tanggal).toLocaleDateString('id-ID', {
-                    day: '2-digit', month: 'long', year: 'numeric'
-                });
-                html += `<tr><td>${formattedDate}</td><td><span class="badge ${badgeClass} p-2">${d.status}</span></td></tr>`;
+                <h6 class="mt-4 text-dark font-weight-bold"><i class="fas fa-list-alt mr-2"></i> Rincian Ketidakhadiran</h6>`;
+
+    if (data.detail && data.detail.length > 0) {
+        // Menggunakan List Group, bukan Tabel
+        html += `<ul class="list-group list-group-flush mt-3">`;
+        data.detail.forEach(d => {
+            const badgeClass = getBadgeClass(d.status);
+            const formattedDate = new Date(d.tanggal).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
             });
-            html += `</tbody></table></div>`;
-        } else {
-            html += `<div class="alert alert-success mt-3 text-center"><i class="fas fa-check-circle mr-2"></i> Tidak ada catatan ketidakhadiran pada semester ini.</div>`;
-        }
-
-        html += '</div></div>';
-        contentContainer.innerHTML = html;
+            // Setiap item adalah list-group-item dengan flexbox
+            html += `
+                <li class="list-group-item d-flex justify-content-between align-items-center px-1">
+                    <div>
+                        <small class="text-muted">${formattedDate}</small>
+                    </div>
+                    <span class="badge ${badgeClass} p-2" style="font-size: 0.8rem;">${d.status}</span>
+                </li>`;
+        });
+        html += `</ul>`;
+    } else {
+        html += `<div class="alert alert-success mt-3 text-center"><i class="fas fa-check-circle mr-2"></i> Ananda selalu hadir pada semester ini. Luar biasa!</div>`;
     }
+
+    html += '</div></div>';
+    contentContainer.innerHTML = html;
+}
+
 </script>
 </body>
 </html>
