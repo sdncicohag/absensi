@@ -264,6 +264,23 @@ body {
     align-items: center;
 }
 
+        .login-logo {
+            max-width: 100px;
+            max-height: 80px;
+            width: auto;
+            height: auto;
+        }
+        .input-group-text {
+            background-color: #e9ecef;
+            border-right: none;
+        }
+        .input-group .form-control {
+            border-left: none;
+        }
+        .input-group .form-control:focus {
+            box-shadow: none !important;
+            border-color: #ced4da;
+        }
 
 /* Wrapper untuk Sidebar dan Konten */
 .wrapper {
