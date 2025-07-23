@@ -8,6 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <link rel="stylesheet" href="style.css">
+
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #e9ecef; }
         .wrapper { display: flex; width: 100%; align-items: stretch; }
@@ -41,32 +43,52 @@
 <body>
 
     <!-- Login Container -->
-    <div class="container" id="login-container">
-        <div class="row justify-content-center align-items-center" style="height: 100vh;">
-            <div class="col-md-6 col-lg-5">
-                <div class="card shadow-lg border-0 rounded-lg p-4">
-                    <div class="card-body">
-                        <div class="back-link-container text-center mb-4">
-                            <a href="index.html" class="text-muted text-decoration-none d-inline-flex align-items-center">
-                                <i class="fas fa-arrow-left mr-2"></i> Kembali ke Halaman Utama
-                            </a>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100" id="login-container">
+        <div class="card shadow-lg border-0 rounded-xl p-4 p-md-5 mx-auto" style="max-width: 450px; width: 100%;"> 
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Lambang_Kab_Sukabumi.svg/1200px-Lambang_Kab_Sukabumi.svg.png" alt="Logo Sekolah" class="login-logo mb-2">
+                    <h4 class="card-title text-primary font-weight-bolder">
+                        Panel Admin
+                    </h4>
+                    <p class="text-muted">SD Negeri Cicohag</p>
+                </div>
+
+                <form id="loginFormAdmin">
+                    <div class="form-group mb-3">
+                        <label for="username" class="font-weight-bold text-dark small">Username Admin</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                 <span class="input-group-text"><i class="fas fa-user-shield"></i></span>
+                            </div>
+                            <input type="text" id="username" class="form-control form-control-lg" placeholder="Masukkan Username" required>
                         </div>
-                        <h3 class="card-title-centered text-primary font-weight-bolder mb-4">
-                            <i class="fas fa-user-shield mr-2"></i> Login Admin
-                        </h3>
-                        <form id="loginFormAdmin">
-                            <div class="form-group">
-                                <label for="username">Username Admin:</label>
-                                <input type="text" id="username" class="form-control" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password:</label>
-                                <input type="password" id="password" class="form-control" required>
-                            </div>
-                            <button type="submit" id="loginButton" class="btn btn-primary btn-block">Login</button>
-                            <div id="login-error" class="alert alert-danger mt-3" style="display:none;"></div>
-                        </form>
                     </div>
+
+                    <div class="form-group mb-4">
+                    <label for="password" class="font-weight-bold text-dark small">Password</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            </div>
+                            <input type="password" id="password" class="form-control form-control-lg" placeholder="Masukkan Password" required>
+                            <div class="input-group-append">
+                                <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
+                                    <i class="fas fa-eye" id="toggleIcon"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="loginButton" class="btn btn-primary btn-lg btn-block font-weight-bold mt-4">
+                        Login <i class="fas fa-sign-in-alt ml-2"></i>
+                    </button> 
+                    <div id="login-error" class="alert alert-danger mt-3 text-center" style="display:none;"></div>
+                </form>
+                <div class="text-center mt-4">
+                    <a href="index.html" class="text-muted small">
+                        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Halaman Utama
+                    </a>
                 </div>
             </div>
         </div>
@@ -90,6 +112,10 @@
                 </li>
                 <li>
                     <a href="#" id="manage-staff-link"><i class="fas fa-users-cog mr-2"></i> Manajemen Staf</a>
+                </li>
+                 <!-- FITUR BARU: PENGATURAN -->
+                <li>
+                    <a href="#" id="settings-link"><i class="fas fa-cogs mr-2"></i> Pengaturan</a>
                 </li>
             </ul>
             <ul class="list-unstyled CTAs p-3">
@@ -210,6 +236,27 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Settings View (FITUR BARU) -->
+                <div id="settings-view" style="display:none;">
+                    <div class="card shadow-sm border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Zona Berbahaya</h5>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Reset Data Absensi</h5>
+                            <p class="card-text">Tindakan ini akan menghapus <strong>SEMUA</strong> data yang berhubungan dengan absensi siswa, termasuk log harian, rekapitulasi, dan cache. Gunakan fitur ini dengan sangat hati-hati, misalnya saat akan memulai tahun ajaran baru atau setelah masa uji coba selesai.</p>
+                            <p class="text-muted">Data yang akan dihapus:</p>
+                            <ul>
+                                <li>Log Absensi Harian (`absensi_harian`)</li>
+                                <li>Log Sakit/Izin/Alfa (`log_absensi`)</li>
+                                <li>Semua Cache Rekap (`rekap_harian_per_kelas`, `agregat_bulanan_kelas`, `cache_rekap_semester`, `rekap_bulanan`)</li>
+                            </ul>
+                            <p class="font-weight-bold text-danger">TINDAKAN INI TIDAK DAPAT DIBATALKAN.</p>
+                            <button id="reset-attendance-data-btn" class="btn btn-danger"><i class="fas fa-exclamation-triangle mr-2"></i> Reset Semua Data Absensi</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -275,6 +322,17 @@
             <p class="text-danger font-weight-bold mt-3">PERHATIAN: Tindakan ini tidak dapat dibatalkan.</p>
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button><button type="button" id="confirmNaikKelasBtn" class="btn btn-warning">Ya, Proses Kenaikan Kelas</button></div>
+    </div></div></div>
+    
+    <!-- Reset Data Modal (FITUR BARU) -->
+    <div class="modal fade" id="resetDataConfirmModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header bg-danger text-white"><h5 class="modal-title">Konfirmasi Reset Data Absensi</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+        <div class="modal-body">
+            <p>Anda yakin ingin menghapus <strong>SEMUA DATA ABSENSI</strong>? Data yang sudah dihapus tidak dapat dipulihkan.</p>
+            <p>Ketik "<strong>RESET DATA</strong>" pada kolom di bawah untuk konfirmasi.</p>
+            <input type="text" id="resetConfirmationInput" class="form-control" placeholder="Ketik di sini untuk konfirmasi">
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button><button type="button" id="confirmResetBtn" class="btn btn-danger" disabled>Ya, Saya Mengerti & Hapus Semua</button></div>
     </div></div></div>
 
     <!-- Staff Modals -->
@@ -387,6 +445,7 @@
         $('#dashboard-view').hide();
         $('#student-management-view').hide();
         $('#staff-management-view').hide();
+        $('#settings-view').hide(); // Sembunyikan view baru
         $(`#${viewId}`).show();
     }
 
@@ -401,6 +460,16 @@
     document.getElementById('dashboard-link').addEventListener('click', (e) => {
         e.preventDefault();
         showDashboardView();
+    });
+    
+    // Event listener untuk menu Pengaturan (FITUR BARU)
+    document.getElementById('settings-link').addEventListener('click', (e) => {
+        e.preventDefault();
+        $('#sidebar ul li').removeClass('active');
+        $(e.target).closest('li').addClass('active');
+        $('#content-title').text('Pengaturan Sistem');
+        $('#content-subtitle').text('Kelola pengaturan dan data sistem.');
+        showView('settings-view');
     });
 
     document.getElementById('class-list-container').addEventListener('click', (e) => {
@@ -795,11 +864,11 @@
             };
 
             const hasChanged = (originalStudent.nomorAbsen || null) !== updatedData.nomorAbsen ||
-                           (originalStudent.nama || '') !== updatedData.nama ||
-                           (originalStudent.namaOrtu || null) !== updatedData.namaOrtu ||
-                           (originalStudent.nomorWa || null) !== updatedData.nomorWa ||
-                           (originalStudent.tglLahir || null) !== updatedData.tglLahir ||
-                           (originalStudent.status || 'Aktif') !== updatedData.status;
+                               (originalStudent.nama || '') !== updatedData.nama ||
+                               (originalStudent.namaOrtu || null) !== updatedData.namaOrtu ||
+                               (originalStudent.nomorWa || null) !== updatedData.nomorWa ||
+                               (originalStudent.tglLahir || null) !== updatedData.tglLahir ||
+                               (originalStudent.status || 'Aktif') !== updatedData.status;
 
             if (hasChanged) {
                 if (originalStudent.status === 'Aktif' && (updatedData.status === 'Pindah' || updatedData.status === 'Lulus')) {
@@ -1117,6 +1186,82 @@
             Toastify({ text: `Gagal mengekspor data: ${error.message}`, style: { background: "red" } }).showToast();
         }
     });
+
+    // --- RESET DATA LOGIC (FITUR BARU) ---
+    document.getElementById('reset-attendance-data-btn').addEventListener('click', () => {
+        $('#resetDataConfirmModal').modal('show');
+    });
+
+    document.getElementById('resetConfirmationInput').addEventListener('keyup', function() {
+        const confirmBtn = document.getElementById('confirmResetBtn');
+        if (this.value === 'RESET DATA') {
+            confirmBtn.disabled = false;
+        } else {
+            confirmBtn.disabled = true;
+        }
+    });
+
+    document.getElementById('confirmResetBtn').addEventListener('click', async () => {
+        const btn = $('#confirmResetBtn');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Menghapus...');
+        
+        const collectionsToDelete = [
+            'log_absensi', 
+            'absensi_harian', 
+            'rekap_harian_per_kelas', 
+            'agregat_bulanan_kelas', 
+            'cache_rekap_semester', 
+            'rekap_bulanan'
+        ];
+
+        try {
+            for (const collectionName of collectionsToDelete) {
+                Toastify({ text: `Menghapus koleksi: ${collectionName}...`, duration: 2000, style: { background: "blue" } }).showToast();
+                await deleteCollection(db, collectionName, 50);
+            }
+            Toastify({ text: "Semua data absensi berhasil direset!", duration: 5000, style: { background: "green" } }).showToast();
+        } catch (error) {
+            console.error("Error resetting data:", error);
+            Toastify({ text: `Gagal mereset data: ${error.message}`, duration: -1, style: { background: "red" } }).showToast();
+        } finally {
+            btn.prop('disabled', false).text('Ya, Saya Mengerti & Hapus Semua');
+            $('#resetDataConfirmModal').modal('hide');
+            document.getElementById('resetConfirmationInput').value = '';
+        }
+    });
+
+    async function deleteCollection(db, collectionPath, batchSize) {
+        const collectionRef = db.collection(collectionPath);
+        const query = collectionRef.orderBy('__name__').limit(batchSize);
+
+        return new Promise((resolve, reject) => {
+            deleteQueryBatch(db, query, resolve).catch(reject);
+        });
+    }
+
+    async function deleteQueryBatch(db, query, resolve) {
+        const snapshot = await query.get();
+
+        const batchSize = snapshot.size;
+        if (batchSize === 0) {
+            // When there are no documents left, we are done
+            resolve();
+            return;
+        }
+
+        // Delete documents in a batch
+        const batch = db.batch();
+        snapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+        await batch.commit();
+
+        // Recurse on the next process tick, to avoid
+        // exploding the stack.
+        process.nextTick(() => {
+            deleteQueryBatch(db, query, resolve);
+        });
+    }
 
 </script>
 </body>
