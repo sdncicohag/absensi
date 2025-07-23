@@ -10,44 +10,70 @@
     <style>
         :root {
             --primary-color: #0056b3;
-            --secondary-color: #ffc107;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
             --light-bg: #f8f9fa;
             --white-bg: #ffffff;
             --text-dark: #212529;
             --text-light: #6c757d;
             --border-radius-lg: 20px;
             --shadow-sm: 0 4px 12px rgba(0,0,0,0.05);
-            --shadow-md: 0 8px 25px rgba(0,0,0,0.08);
+            --shadow-md: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        /* Animasi Fade-in */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--light-bg);
-            padding-top: 80px; /* PERBAIKAN: Memberi ruang untuk navbar */
+            padding-top: 90px; /* Memberi ruang untuk navbar */
         }
 
         .custom-navbar {
-            background-color: var(--light-bg) !important;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
             box-shadow: var(--shadow-sm);
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+
+        .navbar-brand img {
+            height: 40px;
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .hero-section {
+            padding: 4rem 0;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .portal-section {
+            animation: fadeIn 0.8s ease-out 0.2s forwards;
+            opacity: 0; /* Mulai dari transparan untuk animasi */
         }
 
         .portal-card {
             transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
-            border: none;
+            border: 1px solid #e9ecef;
+            border-top-width: 4px;
             border-radius: var(--border-radius-lg);
             box-shadow: var(--shadow-sm);
             background-color: var(--white-bg);
         }
+        
+        /* Aksen warna pada kartu */
+        .portal-guru .portal-card { border-top-color: var(--primary-color); }
+        .portal-ortu .portal-card { border-top-color: var(--success-color); }
+        .portal-admin .portal-card { border-top-color: var(--warning-color); }
 
         .portal-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
             box-shadow: var(--shadow-md) !important;
-        }
-
-        .portal-card:active {
-            transform: translateY(-2px) scale(0.98);
-            box-shadow: var(--shadow-sm) !important;
-            background-color: #e9ecef;
         }
 
         .portal-icon {
@@ -55,94 +81,115 @@
             margin-bottom: 1rem;
         }
         
-        .portal-card .card-title {
-            color: var(--text-dark);
+        .portal-card .card-title { color: var(--text-dark); }
+        .portal-guru .portal-icon { color: var(--primary-color); }
+        .portal-ortu .portal-icon { color: var(--success-color); }
+        .portal-admin .portal-icon { color: var(--warning-color); }
+
+        .main-footer {
+            padding: 2rem 0;
+            margin-top: 4rem;
+            background-color: var(--white-bg);
+            border-top: 1px solid #e9ecef;
         }
 
-        .portal-card .text-primary .fa-chalkboard-teacher { color: var(--primary-color); }
-        .portal-card .text-success .fa-user-graduate { color: #28a745; }
-        .portal-card .text-warning .fa-user-shield { color: var(--secondary-color); }
+        .admin-link-secondary {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            background-color: var(--white-bg);
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s ease-in-out;
+            border: 1px solid #e9ecef;
+        }
+        .admin-link-secondary:hover {
+            color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
 
-        @media (max-width: 576px) {
-            body {
-                padding-top: 70px; /* Menyesuaikan padding untuk navbar mobile */
+        /* REVISI UTAMA UNTUK MOBILE */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 2.5rem 0 2rem 0; /* Padding atas & bawah dikurangi */
             }
-            .main-container {
-                padding-top: 2rem;
-                padding-bottom: 4rem;
-                min-height: auto;
+            .hero-section h1 {
+                font-size: 2rem; /* Ukuran judul utama diperkecil */
             }
-            .portal-card .card-body {
-                padding: 1.25rem;
+            .hero-section p {
+                font-size: 1rem; /* Ukuran deskripsi diperkecil */
             }
             .portal-icon {
-                font-size: 2rem;
-                margin-bottom: 0.5rem;
+                font-size: 2.5rem;
             }
-            .portal-card .card-title {
-                font-size: 1.05rem;
-            }
-            .portal-card .card-text {
-                font-size: 0.85rem;
+            .container {
+                padding-left: 20px;
+                padding-right: 20px;
             }
         }
-
     </style>
+
 </head>
 <body>
-    <!-- PERBAIKAN: Navbar baru yang sticky -->
     <nav class="navbar navbar-light fixed-top custom-navbar">
-        <div class="container justify-content-center">
-            <a class="navbar-brand text-center" href="#">
-                <h5 class="font-weight-bolder text-dark main-title mb-0">Sistem Informasi Sekolah</h5>
-                <span class="text-muted small">SD Negeri Cicohag</span>
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Lambang_Kab_Sukabumi.svg/1200px-Lambang_Kab_Sukabumi.svg.png" alt="Logo Sekolah">
+                <div>
+                    <h5 class="font-weight-bolder text-dark main-title mb-0">Sistem Informasi</h5>
+                    <span class="text-muted small">SD Negeri Cicohag</span>
+                </div>
             </a>
         </div>
     </nav>
 
-    <div class="container">
-        <div class="row justify-content-center align-items-center main-container" style="min-height: calc(100vh - 80px);">
-            <div class="col-lg-10 col-xl-9">
-                <div class="row justify-content-center">
-                    <!-- Portal Guru & Staf -->
-                    <div class="col-md-4 col-9 mb-4">
-                        <a href="guru.html" class="text-decoration-none">
-                            <div class="card h-100 text-center portal-card">
-                                <div class="card-body p-4">
-                                    <div class="portal-icon text-primary"><i class="fas fa-chalkboard-teacher"></i></div>
-                                    <h5 class="card-title font-weight-bold">Portal Guru & Staf</h5>
-                                    <p class="card-text text-muted small">Akses fitur absensi dan manajemen kelas.</p>
-                                </div>
+    <div class="container mt-5 mb-5">
+        <section class="hero-section text-center">
+            <h1 class="display-4 font-weight-bolder text-dark">Absensi Digital <br> SD Negeri Cicohag</h1>
+            <p class="lead text-muted col-md-8 mx-auto">Silakan pilih yang sesuai dengan peranmu.</p>
+        </section>
+
+        <section class="portal-section">
+            <div class="row justify-content-center">
+                <div class="col-md-4 col-6 mb-4 portal-guru">
+                    <a href="guru.html" class="text-decoration-none">
+                        <div class="card h-100 text-center portal-card">
+                            <div class="card-body p-4">
+                                <div class="portal-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                                <h6 class="card-title font-weight-bold">Guru & Staf</h6>
                             </div>
-                        </a>
-                    </div>
-                    <!-- Portal Siswa & Orang Tua -->
-                    <div class="col-md-4 col-9 mb-4">
-                        <a href="ortu.html" class="text-decoration-none">
-                            <div class="card h-100 text-center portal-card">
-                                <div class="card-body p-4">
-                                    <div class="portal-icon text-success"><i class="fas fa-user-graduate"></i></div>
-                                    <h5 class="card-title font-weight-bold">Portal Siswa & Ortu</h5>
-                                    <p class="card-text text-muted small">Lihat rekap kehadiran dan info kelas.</p>
-                                </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4 col-6 mb-4 portal-ortu">
+                    <a href="ortu.html" class="text-decoration-none">
+                        <div class="card h-100 text-center portal-card">
+                            <div class="card-body p-4">
+                                <div class="portal-icon"><i class="fas fa-user-graduate"></i></div>
+                                <h6 class="card-title font-weight-bold">Siswa & Ortu</h6>
                             </div>
-                        </a>
-                    </div>
-                    <!-- Panel Admin -->
-                    <div class="col-md-4 col-9 mb-4">
-                        <a href="admin.html" class="text-decoration-none">
-                            <div class="card h-100 text-center portal-card">
-                                <div class="card-body p-4">
-                                    <div class="portal-icon text-warning"><i class="fas fa-user-shield"></i></div>
-                                    <h5 class="card-title font-weight-bold">Panel Admin</h5>
-                                    <p class="card-text text-muted small">Kelola data master siswa dan staf sekolah.</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                        </div>
+                    </a>
                 </div>
             </div>
-        </div>
+            <div class="row justify-content-center mt-3">
+                <div class="col-12 text-center">
+                    <a href="admin.html" class="admin-link-secondary">
+                        <i class="fas fa-user-shield mr-2"></i>Masuk sebagai Admin
+                    </a>
+                </div>
+            </div>
+        </section>
+        
     </div>
+
+    <footer class="main-footer">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 SD Negeri Cicohag. Semua Hak Cipta Dilindungi.</span>
+        </div>
+    </footer>
 </body>
 </html>
