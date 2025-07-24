@@ -38,6 +38,13 @@
             #action-buttons { flex-wrap: wrap; justify-content: flex-end; }
             #action-buttons > div > button { margin-bottom: 0.5rem; }
         }
+        #main-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e9ecef; /* Tambahkan baris ini */
+        }
     </style>
 </head>
 <body>
@@ -250,7 +257,7 @@
                             <ul>
                                 <li>Log Absensi Harian (`absensi_harian`)</li>
                                 <li>Log Sakit/Izin/Alfa (`log_absensi`)</li>
-                                <li>Semua Cache Rekap (`rekap_harian_per_kelas`, `agregat_bulanan_kelas`, `cache_rekap_semester`, `rekap_bulanan`)</li>
+                                <li>Semua Cache Rekap (`rekap_harian_per_kelas`, `agregat_bulanan_kelas`, `cache_rekap_semester`, `rekap_bulanan`, 'rekap_ketidakhadiran_harian')</li>
                             </ul>
                             <p class="font-weight-bold text-danger">TINDAKAN INI TIDAK DAPAT DIBATALKAN.</p>
                             <button id="reset-attendance-data-btn" class="btn btn-danger"><i class="fas fa-exclamation-triangle mr-2"></i> Reset Semua Data Absensi</button>
@@ -399,6 +406,9 @@
     // --- Login & Logout Logic ---
     document.getElementById('loginFormAdmin').addEventListener('submit', async (e) => {
         e.preventDefault();
+        if (document.activeElement) {
+            document.activeElement.blur();
+        }
         const loginButton = document.getElementById('loginButton');
         const loginError = document.getElementById('login-error');
         loginButton.disabled = true;
@@ -411,7 +421,7 @@
             const snapshot = await db.collection('staff').where('username', '==', username).where('password', '==', password).where('role', '==', 'admin').get();
             if (snapshot.empty) throw new Error("Username atau password salah, atau Anda bukan admin.");
 
-            loginContainer.style.display = 'none';
+            loginContainer.classList.add('d-none');
             mainWrapper.style.display = 'flex';
             renderStaticClasses();
             showDashboardView();
@@ -426,7 +436,7 @@
 
     document.getElementById('logoutButton').addEventListener('click', () => {
         mainWrapper.style.display = 'none';
-        loginContainer.style.display = 'block';
+        loginContainer.classList.remove('d-none'); // Ganti baris ini
         document.getElementById('loginFormAdmin').reset();
     });
 
@@ -1211,7 +1221,8 @@
             'rekap_harian_per_kelas', 
             'agregat_bulanan_kelas', 
             'cache_rekap_semester', 
-            'rekap_bulanan'
+            'rekap_bulanan',
+            'rekap_ketidakhadiran_harian'
         ];
 
         try {
@@ -1256,11 +1267,11 @@
         });
         await batch.commit();
 
-        // Recurse on the next process tick, to avoid
+        // Recurse on the next event loop tick, to avoid
         // exploding the stack.
-        process.nextTick(() => {
+        setTimeout(() => { // GANTI DARI process.nextTick
             deleteQueryBatch(db, query, resolve);
-        });
+        }, 0);
     }
 
 </script>
