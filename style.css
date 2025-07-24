@@ -488,6 +488,7 @@ body {
     }
 }
 
+
 /* =================================================================
    GAYA UNTUK ELEMEN SPESIFIK LAINNYA (DARI KODE ANDA SEBELUMNYA)
    ================================================================= */
@@ -661,6 +662,19 @@ body {
    RESPONSIVITAS UNTUK LAYAR KECIL (MOBILE) - DIKONSOLIDASI
    ================================================================= */
 @media (max-width: 768px) {
+    #sidebar-overlay {
+    display: none; /* Sembunyi secara default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 998; /* Harus di bawah sidebar (z-index: 999) */
+    }
+    #sidebar-overlay.active {
+        display: block; /* Tampil saat sidebar aktif */
+    }
     #sidebar {
         margin-left: -250px;
     }
