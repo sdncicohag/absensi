@@ -248,18 +248,6 @@
 
     document.getElementById('showJadwalBtn').addEventListener('click', fetchInfoJadwal);
 
-    // REVISI: Logika logout kembali sederhana untuk satu tombol
-    document.getElementById('logoutButtonSiswa').addEventListener('click', () => {
-        currentSiswa = null;
-        portalNavbar.style.display = 'none';
-        rekapContainer.style.display = 'none';
-        loginContainer.style.display = 'block';
-        mainContentWrapper.classList.add('align-items-center', 'min-vh-100');
-        contentContainer.innerHTML = '';
-        document.getElementById('jadwalModalBody').innerHTML = '';
-        document.getElementById('loginFormSiswa').reset();
-    }); 
-
     async function fetchRekapSiswa(semester) {
         contentContainer.innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p class="text-muted">Memuat rekap semester...</p></div>';
         
