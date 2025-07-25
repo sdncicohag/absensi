@@ -131,10 +131,10 @@
                 <div id="dashboard-content-area">
                     <div id="daily-summary-display"></div> 
                 </div>
-                <div id="main-content-area">
-                    </div>
+                <div id="main-content-area"></div>   
         </div>
-            <div id="sidebar-overlay"></div> 
+    </div>
+    <div id="sidebar-overlay"></div> 
 </div>
 
 <div class="modal fade" id="scan-modal" tabindex="-1">
@@ -1807,33 +1807,25 @@ async function renderDailySummary() {
         let html = '';
         
         if (currentUser.role === 'walikelas') {
+            // Logika untuk walikelas tidak berubah karena sudah efisien
             const mainTitle = `Ringkasan Absensi: Kelas ${currentUser.kelasDiampu}`;
             const rekapRef = db.collection('rekap_harian_per_kelas').doc(`${tglString}_${currentUser.kelasDiampu}`);
             const rekapDoc = await rekapRef.get();
 
-            let data; // Deklarasikan variabel data
+            let data;
 
             if (rekapDoc.exists) {
-                // JALUR 1: Dokumen sudah ada, langsung gunakan datanya.
                 data = rekapDoc.data();
             } else {
-                // JALUR 2: Dokumen belum ada. Hitung total siswa dan buat dokumen cache.
                 console.log(`Cache rekap harian untuk ${currentUser.kelasDiampu} tidak ditemukan, membuat...`);
                 const siswaKelasSnapshot = await db.collection('siswa').where('kelas', '==', currentUser.kelasDiampu).where('status', '==', 'Aktif').get();
                 const totalSiswa = siswaKelasSnapshot.size;
 
-                // Siapkan struktur data default
                 data = {
                     totalSiswa: totalSiswa,
-                    hadir: 0,
-                    pulang: 0,
-                    sakit: 0,
-                    izin: 0,
-                    alpha: 0,
+                    hadir: 0, pulang: 0, sakit: 0, izin: 0, alpha: 0,
                     belumAbsen: totalSiswa
                 };
-
-                // Buat dokumen di Firestore agar bisa dibaca lagi nanti tanpa menghitung ulang.
                 await rekapRef.set(data);
                 console.log("Cache rekap harian berhasil dibuat.");
             }
@@ -1855,63 +1847,31 @@ async function renderDailySummary() {
             `;
 
         } else { 
-            // --- LOGIKA BARU UNTUK ADMIN/MAPEL DENGAN CACHE ---
+            // --- INI ADALAH BAGIAN YANG DIOPTIMALKAN UNTUK ADMIN ---
             const mainTitle = 'Ringkasan Absensi Seluruh Sekolah';
 
-            // 1. Ambil semua siswa aktif untuk mendapatkan daftar kelas unik & total siswa per kelas
-            const allSiswaSnapshot = await db.collection('siswa').where('status', '==', 'Aktif').get();
-            const classDataMap = new Map();
-            allSiswaSnapshot.docs.forEach(doc => {
-                const siswa = doc.data();
-                if (!classDataMap.has(siswa.kelas)) {
-                    classDataMap.set(siswa.kelas, { totalSiswa: 0 });
-                }
-                classDataMap.get(siswa.kelas).totalSiswa++;
-            });
-
-            // 2. Ambil SEMUA rekap harian yang ada untuk hari ini (1 Query)
+            // 1. Langsung ambil SEMUA rekap harian yang ada untuk hari ini (Sangat efisien, hanya beberapa reads)
             const rekapQuery = db.collection('rekap_harian_per_kelas').where(firebase.firestore.FieldPath.documentId(), '>=', tglString).where(firebase.firestore.FieldPath.documentId(), '<', tglString + 'z');
-            let rekapSnapshot = await rekapQuery.get(); // Gunakan let agar bisa di-reassign
-            const existingRekapClasses = new Set(rekapSnapshot.docs.map(doc => doc.id.split('_')[1]));
+            const rekapSnapshot = await rekapQuery.get();
 
-            // 3. Buat dokumen rekap yang belum ada dalam satu batch
-            const batch = db.batch();
-            let needsBatchCommit = false;
-            classDataMap.forEach((data, className) => {
-                if (!existingRekapClasses.has(className)) {
-                    console.log(`Cache rekap harian untuk ${className} tidak ditemukan, membuat...`);
-                    const rekapRef = db.collection('rekap_harian_per_kelas').doc(`${tglString}_${className}`);
-                    const newRekapData = {
-                        totalSiswa: data.totalSiswa,
-                        hadir: 0, pulang: 0, sakit: 0, izin: 0, alpha: 0,
-                        belumAbsen: data.totalSiswa
-                    };
-                    batch.set(rekapRef, newRekapData);
-                    needsBatchCommit = true;
-                }
-            });
-            
-
-            if (needsBatchCommit) {
-                await batch.commit();
-                // Ambil ulang data setelah cache dibuat
-                rekapSnapshot = await rekapQuery.get(); 
-            }
-
-            // 4. Lanjutkan proses agregasi seperti biasa
+            // 2. Agregasi data dari dokumen yang ada
             let totalData = { totalSiswa: 0, hadir: 0, pulang: 0, sakit: 0, izin: 0, alpha: 0, belumAbsen: 0 };
             const classSummaries = {};
 
-            rekapSnapshot.forEach(doc => {
-                const data = doc.data();
-                const kelas = doc.id.split('_')[1];
-                classSummaries[kelas] = data;
+            if (!rekapSnapshot.empty) {
+                rekapSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    const kelas = doc.id.split('_')[1];
+                    classSummaries[kelas] = data;
 
-                Object.keys(data).forEach(key => {
-                    totalData[key] = (totalData[key] || 0) + (data[key] || 0);
+                    // Jumlahkan setiap field, TERMASUK totalSiswa
+                    Object.keys(totalData).forEach(key => {
+                        totalData[key] += (data[key] || 0);
+                    });
                 });
-            });
+            }
 
+            // 3. Render HTML dengan data yang sudah diagregasi
             html = `
                 <div class="quick-summary-card global-summary-card">
                     <h5 class="summary-title"><i class="fas fa-calendar-day"></i> ${mainTitle}</h5>
@@ -1934,35 +1894,40 @@ async function renderDailySummary() {
                     <div class="accordion" id="classAccordion">
             `;
             const sortedKelas = Object.keys(classSummaries).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
-            sortedKelas.forEach((kelas) => {
-                const classData = classSummaries[kelas];
-                const classId = kelas.replace(/\s+/g, '-').toLowerCase();
-                html += `
-                    <div class="card class-accordion-item">
-                        <div class="card-header" id="heading${classId}">
-                            <h2 class="mb-0">
-                                <button class="btn btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapse${classId}" aria-expanded="false">
-                                    Kelas ${kelas}
-                                    <span class="badge badge-primary">${classData.hadir}/${classData.totalSiswa} Hadir</span>
-                                    <i class="fas fa-chevron-down accordion-icon"></i>
-                                </button>
-                            </h2>
-                        </div>
-                        <div id="collapse${classId}" class="collapse" data-parent="#classAccordion">
-                            <div class="card-body">
-                                <div class="summary-metrics compact-metrics">
-                                    <div class="metric-item present"><span class="metric-value">${classData.hadir}</span><span class="metric-label">Hadir</span></div>
-                                    <div class="metric-item return"><span class="metric-value">${classData.pulang}</span><span class="metric-label">Pulang</span></div>
-                                    <div class="metric-item sick"><span class="metric-value">${classData.sakit}</span><span class="metric-label">Sakit</span></div>
-                                    <div class="metric-item permission"><span class="metric-value">${classData.izin}</span><span class="metric-label">Izin</span></div>
-                                    <div class="metric-item absent"><span class="metric-value">${classData.alpha}</span><span class="metric-label">Alfa</span></div>
-                                    <div class="metric-item pending"><span class="metric-value">${classData.belumAbsen}</span><span class="metric-label">Belum Absen</span></div>
+            
+            if (sortedKelas.length === 0) {
+                 html += '<p class="text-muted text-center p-3">Belum ada data absensi yang masuk untuk hari ini.</p>';
+            } else {
+                sortedKelas.forEach((kelas) => {
+                    const classData = classSummaries[kelas];
+                    const classId = kelas.replace(/\s+/g, '-').toLowerCase();
+                    html += `
+                        <div class="card class-accordion-item">
+                            <div class="card-header" id="heading${classId}">
+                                <h2 class="mb-0">
+                                    <button class="btn btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapse${classId}" aria-expanded="false">
+                                        Kelas ${kelas}
+                                        <span class="badge badge-primary">${classData.hadir || 0}/${classData.totalSiswa || 0} Hadir</span>
+                                        <i class="fas fa-chevron-down accordion-icon"></i>
+                                    </button>
+                                </h2>
+                            </div>
+                            <div id="collapse${classId}" class="collapse" data-parent="#classAccordion">
+                                <div class="card-body">
+                                    <div class="summary-metrics compact-metrics">
+                                        <div class="metric-item present"><span class="metric-value">${classData.hadir || 0}</span><span class="metric-label">Hadir</span></div>
+                                        <div class="metric-item return"><span class="metric-value">${classData.pulang || 0}</span><span class="metric-label">Pulang</span></div>
+                                        <div class="metric-item sick"><span class="metric-value">${classData.sakit || 0}</span><span class="metric-label">Sakit</span></div>
+                                        <div class="metric-item permission"><span class="metric-value">${classData.izin || 0}</span><span class="metric-label">Izin</span></div>
+                                        <div class="metric-item absent"><span class="metric-value">${classData.alpha || 0}</span><span class="metric-label">Alfa</span></div>
+                                        <div class="metric-item pending"><span class="metric-value">${classData.belumAbsen || 0}</span><span class="metric-label">Belum Absen</span></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
+            }
             html += `</div></div>`;
         }
 
