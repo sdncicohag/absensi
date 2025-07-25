@@ -90,6 +90,8 @@
                     <ul class="collapse list-unstyled" id="walikelasSubmenu">
                         <li><a href="#" id="sidebar-daftar-siswa"><i class="fas fa-address-book"></i> Daftar Siswa Kelas</a></li>
                         <li><a href="#" id="sidebar-info-jadwal"><i class="fas fa-calendar-alt"></i> Info & Jadwal Kelas</a></li>
+                        
+                        <li><a href="#" id="sidebar-nilai-semester"><i class="fas fa-keyboard"></i> Input Nilai Rapor</a></li>
                     </ul>
                 </li>
             <li>
@@ -129,12 +131,10 @@
                 <div id="dashboard-content-area">
                     <div id="daily-summary-display"></div> 
                 </div>
-            </div>
-            <div id="main-content-area">
-            </div>
+                <div id="main-content-area">
+                    </div>
         </div>
-    </div>
-    <div id="sidebar-overlay"></div> 
+            <div id="sidebar-overlay"></div> 
 </div>
 
 <div class="modal fade" id="scan-modal" tabindex="-1">
@@ -234,6 +234,49 @@
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button><button type="button" id="saveOrderBtn" class="btn btn-primary">Simpan Urutan</button></div>
     </div></div></div>
+    <div class="modal fade" id="konfigurasiMapelModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Atur Mata Pelajaran Aktif</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted">Non-aktifkan mata pelajaran yang tidak diajarkan di kelas ini pada semester yang dipilih. Pengaturan ini akan berlaku untuk semua siswa.</p>
+                    <div id="mapel-list-container"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" id="saveMapelConfigBtn" class="btn btn-primary">Simpan Pengaturan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="inputNilaiModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="inputNilaiModalTitle">Input Nilai Siswa</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-input-nilai">
+                        <div id="form-nilai-container"></div>
+                        <hr>
+                        <div class="form-group">
+                            <label for="link-pdf-rapor"><strong>Link Unduh Rapor (PDF)</strong></label>
+                            <input type="url" id="link-pdf-rapor" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" id="saveNilaiSiswaBtn" class="btn btn-primary">Simpan Nilai</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
@@ -262,6 +305,21 @@ const db = firebase.firestore();
 let currentUser = null;
 let fullRekapData = {};
 const html5QrCode = new Html5Qrcode("reader");
+// [FITUR NILAI] Variabel global untuk menyimpan state
+let nilaiState = {
+    kelas: null,
+    semester: null,
+    tahunAjaran: null,
+    daftarSiswa: [],
+    konfigurasiMapel: [],
+    siswaSedangDiedit: null
+};
+
+// [FITUR NILAI] Daftar mata pelajaran master
+const daftarMapelMaster = [
+    "Pendidikan Agama", "Pendidikan Pancasila", "Bahasa Indonesia", "Matematika",
+    "IPAS", "PJOK", "Seni Budaya", "Bahasa Inggris", "Bahasa Sunda"
+];
 
 const loginContainer = document.getElementById('login-container');
 const mainContainer = document.getElementById('main-container'); // Pastikan ID ini benar
@@ -272,6 +330,15 @@ const dashboardContentArea = document.getElementById('dashboard-content-area');
 const dailySummaryDisplay = document.getElementById('daily-summary-display'); // REFERENSI BARU untuk daily summary
 const mainContentArea = document.getElementById('main-content-area');
 
+// --- FUNGSI BARU UNTUK MENYEMBUNYIKAN SEMUA AREA KONTEN UTAMA ---
+function hideAllMainContentAreas() {
+    dashboardContentArea.style.display = 'none';
+    mainContentArea.style.display = 'none';
+    // nilai-selection-view dan nilai-input-view akan otomatis tersembunyi
+    // karena mereka berada di dalam mainContentArea yang disembunyikan.
+}
+// --- AKHIR FUNGSI hideAllMainContentAreas ---
+
     // Referensi ke elemen-elemen sidebar
     const sidebarUnscannedLink = document.getElementById('sidebar-unscanned-link');
     const sidebarManualLink = document.getElementById('sidebar-manual-link');
@@ -280,9 +347,8 @@ const mainContentArea = document.getElementById('main-content-area');
     const sidebarDailyCorrectionLink = document.getElementById('sidebar-daily-correction-link');
     const menuWalikelasOnly = document.getElementById('menu-walikelas-only');
     const sidebarCatatanHarianLink = document.getElementById('sidebar-catatan-harian-link'); // <-- TAMBAHKAN BARIS INI
-
-
-
+    const menuNilaiWalikelasOnly = document.getElementById('menu-nilai-walikelas-only');
+ 
 
     // Referensi tombol di sidebar
     // --- Event Listeners ---
@@ -298,8 +364,30 @@ const mainContentArea = document.getElementById('main-content-area');
     document.getElementById('sidebar-daftar-siswa').addEventListener('click', (e) => { e.preventDefault(); showDaftarSiswaView(); });
     document.getElementById('sidebar-info-jadwal').addEventListener('click', (e) => { e.preventDefault(); showInfoJadwalView(); });
     document.getElementById('sidebar-catatan-harian').addEventListener('click', (e) => { e.preventDefault(); showCatatanHarianView(); });
+    document.getElementById('sidebar-nilai-semester').addEventListener('click', (e) => { e.preventDefault(); showNilaiSelectionView(); });
+    
 
+// --- FUNGSI UNTUK TOGGLE PASSWORD VISIBILITY ---
+const togglePassword = document.getElementById('togglePassword');
+const passwordInput = document.getElementById('password');
+const toggleIcon = document.getElementById('toggleIcon');
 
+togglePassword.addEventListener('click', function () {
+    // Cek tipe input saat ini
+    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+    passwordInput.setAttribute('type', type);
+    
+    // Ganti ikon mata
+    if (type === 'password') {
+        // Jika tipe adalah password, ikonnya adalah mata terbuka
+        toggleIcon.classList.remove('fa-eye-slash');
+        toggleIcon.classList.add('fa-eye');
+    } else {
+        // Jika tipe adalah text, ikonnya adalah mata dicoret
+        toggleIcon.classList.remove('fa-eye');
+        toggleIcon.classList.add('fa-eye-slash');
+    }
+});
 
 // --- Logika Login ---
 document.getElementById('loginForm').addEventListener('submit', async function(e) {
@@ -337,7 +425,8 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             sidebarManualLink.style.display = isWaliKelas ? 'block' : 'none';
             sidebarDailyCorrectionLink.style.display = isWaliKelas ? 'block' : 'none';
             menuWalikelasOnly.style.display = isWaliKelas ? 'block' : 'none';
-            sidebarCatatanHarianLink.style.display = isWaliKelas ? 'block' : 'none'; // <-- TAMBAHKAN BARIS INI
+            sidebarCatatanHarianLink.style.display = isWaliKelas ? 'block' : 'none';
+            menuNilaiWalikelasOnly.style.display = isWaliKelas ? 'block' : 'none';
                 
     } catch (error) {
         loginError.textContent = error.message;
@@ -353,7 +442,8 @@ function logout() {
     currentUser = null;
     mainContainer.style.display = 'none';
     loginContainer.style.display = 'block';
-    dashboardContentArea.innerHTML = '';
+    // Pastikan semua area konten disembunyikan saat logout
+    dashboardContentArea.innerHTML = ''; 
     mainContentArea.innerHTML = '';
     document.getElementById('loginForm').reset();
     window.location.reload(); 
@@ -370,7 +460,6 @@ $(document).ready(function () {
         $(this).toggleClass('active'); 
         // Untuk navbar, kelas 'active' hanya perlu diatur oleh tombol desktop agar tidak ada duplikasi toggle
         // atau kita buat ini terpisah agar mobile tetap mengontrol navbar juga.
-        // Untuk saat ini, kita biarkan saja sidebar dan content, navbar akan diatur oleh tombol desktop.
         // Atau lebih baik, keduanya mengontrol navbar. Mari kita buat keduanya mengontrol navbar.
         $('.custom-navbar-top').toggleClass('active'); // Pastikan ini juga di-toggle oleh tombol mobile
     });
@@ -605,8 +694,8 @@ document.getElementById('confirmButton').addEventListener('click', async () => {
 
 // --- FITUR BARU: CATATAN ABSEN HARIAN UNTUK BUKU MANUAL (VERSI FINAL EFISIEN) ---
 async function showCatatanHarianView() {
-    dashboardContentArea.style.display = 'none';
-    mainContentArea.style.display = 'block';
+    hideAllMainContentAreas(); // Sembunyikan semua yang lain
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
 
     const today = new Date();
     const todayString = today.getFullYear() + '-' + (today.getMonth() + 1).toString().padStart(2, '0') + '-' + today.getDate().toString().padStart(2, '0');
@@ -672,9 +761,8 @@ async function showCatatanHarianView() {
 // =================================================================
 function showQuickSummary() {
     console.log('Entering showQuickSummary()...');
-    // Pastikan hanya dashboardContentArea yang terlihat
-    dashboardContentArea.style.display = 'block';
-    mainContentArea.style.display = 'none'; // Sembunyikan mainContentArea
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    dashboardContentArea.style.display = 'block'; // Tampilkan dashboard saja
     
     // Opsional: Pastikan dailySummaryDisplay itu sendiri juga 'block'
     // dailySummaryDisplay.style.display = 'block'; // Biasanya tidak perlu jika parentnya block
@@ -685,8 +773,8 @@ function showQuickSummary() {
 
     // --- FITUR BARU: DAFTAR SISWA ---
     async function showDaftarSiswaView() {
-        dashboardContentArea.style.display = 'none';
-        mainContentArea.style.display = 'block';
+        hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+        mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
         
         mainContentArea.innerHTML = `
             <div class="card shadow-sm">
@@ -767,8 +855,8 @@ function showQuickSummary() {
 
     // --- FITUR BARU: INFO & JADWAL KELAS ---
     async function showInfoJadwalView() {
-        dashboardContentArea.style.display = 'none';
-        mainContentArea.style.display = 'block';
+        hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+        mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
         mainContentArea.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat info & jadwal...</p></div>';
 
         try {
@@ -1016,9 +1104,9 @@ function showQuickSummary() {
 
 
 function showRekapSemesterSelection() {
-    dashboardContentArea.style.display = 'none'; 
-    mainContentArea.style.display = 'block'; 
-    dailySummaryDisplay.style.display = 'none';
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
+    // dailySummaryDisplay.style.display = 'none'; // Ini tidak lagi diperlukan karena hideAllMainContentAreas sudah menangani
 
     mainContentArea.innerHTML = `
         <div id="semester-selection-card" class="card card-body mt-4">
@@ -1040,8 +1128,8 @@ function showRekapSemesterSelection() {
 
 // *** FUNGSI BARU UNTUK MENAMPILKAN REKAP HARIAN (REVISI UI/UX + PEMILIH TAHUN) ***
 async function showDailyRecapView() {
-    dashboardContentArea.style.display = 'none';
-    mainContentArea.style.display = 'block';
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
 
     // State untuk menyimpan pilihan saat ini
     let selectedClass = currentUser.role === 'walikelas' ? currentUser.kelasDiampu : null;
@@ -1078,7 +1166,6 @@ async function showDailyRecapView() {
                 <h5 class="card-title text-center"><i class="fas fa-calendar-day"></i> Rekap Absensi Harian</h5>
                 ${classSelectorHtml}
                 
-                <!-- UI Pemilih Bulan dan Tahun -->
                 <div class="month-selector-container" style="position: relative;">
                     <div class="d-flex justify-content-center align-items-center my-3">
                         <button id="prev-month-btn" class="btn btn-light btn-lg"><i class="fas fa-chevron-left"></i></button>
@@ -1086,7 +1173,6 @@ async function showDailyRecapView() {
                         <button id="next-month-btn" class="btn btn-light btn-lg"><i class="fas fa-chevron-right"></i></button>
                     </div>
                     
-                    <!-- Panel Pemilih Bulan dan Tahun yang Baru -->
                     <div id="month-year-selector" class="card shadow-lg" style="display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 1000; width: 280px;">
                         <div class="card-body p-2">
                             <div class="d-flex justify-content-between align-items-center mb-2">
@@ -1095,8 +1181,7 @@ async function showDailyRecapView() {
                                 <button id="selector-next-year" class="btn btn-sm btn-outline-secondary">&gt;</button>
                             </div>
                             <div id="selector-month-grid" class="row no-gutters">
-                                <!-- Bulan-bulan akan di-generate di sini -->
-                            </div>
+                                </div>
                         </div>
                     </div>
                 </div>
@@ -1206,7 +1291,6 @@ async function showDailyRecapView() {
     // Panggilan inisialisasi
     updateDisplayAndRender();
 }
-
 
 
 // *** FUNGSI BARU UNTUK MERENDER TABEL REKAP HARIAN ***
@@ -1383,8 +1467,8 @@ async function renderCekUsiaTable(className, year, month) {
 
 async function showCekUsiaView() {
     // Fungsi ini SANGAT MIRIP dengan showDailyRecapView, hanya memanggil render function yang berbeda
-    dashboardContentArea.style.display = 'none';
-    mainContentArea.style.display = 'block';
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
 
     let selectedClass = currentUser.role === 'walikelas' ? currentUser.kelasDiampu : null;
     let currentDate = new Date();
@@ -1531,8 +1615,8 @@ async function showCekUsiaView() {
 
 
 async function showUnscannedForm() {
-    dashboardContentArea.style.display = 'none';
-    mainContentArea.style.display = 'block';
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
     mainContentArea.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Mencari siswa belum absen...</p></div>';
 
     try {
@@ -1614,8 +1698,8 @@ async function showUnscannedForm() {
 }
 
 async function showManualAttendanceForm() {
-    dashboardContentArea.style.display = 'none';
-    mainContentArea.style.display = 'block';
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
     mainContentArea.innerHTML = `
         <div class="card">
             <div class="card-body">
@@ -1789,7 +1873,7 @@ async function renderDailySummary() {
 
             // 2. Ambil SEMUA rekap harian yang ada untuk hari ini (1 Query)
             const rekapQuery = db.collection('rekap_harian_per_kelas').where(firebase.firestore.FieldPath.documentId(), '>=', tglString).where(firebase.firestore.FieldPath.documentId(), '<', tglString + 'z');
-            const rekapSnapshot = await rekapQuery.get();
+            let rekapSnapshot = await rekapQuery.get(); // Gunakan let agar bisa di-reassign
             const existingRekapClasses = new Set(rekapSnapshot.docs.map(doc => doc.id.split('_')[1]));
 
             // 3. Buat dokumen rekap yang belum ada dalam satu batch
@@ -2464,8 +2548,8 @@ async function saveManualAttendance(e) {
 // --- NEW FEATURE: KOREKSI KETIDAKHADIRAN HARI INI ---
 async function showDailyCorrectionForm() {
     // Sembunyikan area konten lain dan tampilkan area utama
-    dashboardContentArea.style.display = 'none';
-    mainContentArea.style.display = 'block';
+    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
+    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
     mainContentArea.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat daftar siswa untuk koreksi...</p></div>';
 
     try {
@@ -2600,8 +2684,8 @@ document.getElementById('saveDailyCorrectionBtn').addEventListener('click', asyn
             absensi: firebase.firestore.FieldValue.arrayUnion({ tanggal: tglString, status: newStatus, logId: logId })
         });
 
-        const oldStatusFieldAgregat = originalStatus === 'Tanpa Keterangan' ? 'alfa' : originalStatus.toLowerCase();
-        const newStatusFieldAgregat = newStatus === 'Tanpa Keterangan' ? 'alfa' : newStatus.toLowerCase();
+        const oldStatusFieldAgregat = originalStatus === 'Tanpa Keterangan' ? 'alpha' : originalStatus.toLowerCase();
+        const newStatusFieldAgregat = newStatus === 'Tanpa Keterangan' ? 'alpha' : newStatus.toLowerCase();
         batch.update(agregatRef, {
             [`rekap.tgl_${day}.${oldStatusFieldAgregat}`]: firebase.firestore.FieldValue.increment(-1),
             [`rekap.tgl_${day}.${newStatusFieldAgregat}`]: firebase.firestore.FieldValue.increment(1)
@@ -2679,10 +2763,8 @@ function getBadgeClass(status) {
 async function updateDailyAbsenceRecap(batch, data) {
     const { nisn, nama, nomorAbsen, kelas, status, tanggal, isCorrection = false, oldStatus = null } = data;
 
-    // Hanya proses status tidak hadir
-    if (!['Sakit', 'Izin', 'Tanpa Keterangan'].includes(status) && !isCorrection) {
-        return;
-    }
+    // Status yang ingin dicatat di rekap_ketidakhadiran_harian adalah Sakit, Izin, dan Tanpa Keterangan
+    const statusToRecord = ['Sakit', 'Izin', 'Tanpa Keterangan'];
 
     const docId = `${tanggal}_${kelas}`;
     const recapRef = db.collection('rekap_ketidakhadiran_harian').doc(docId);
@@ -2691,25 +2773,33 @@ async function updateDailyAbsenceRecap(batch, data) {
         nisn: nisn,
         nama: nama,
         nomorAbsen: nomorAbsen || 0,
-        status: status
+        // Pastikan status yang disimpan di sini adalah "Tanpa Keterangan" jika itu yang dipilih
+        status: status 
     };
 
-    // Jika ini adalah koreksi, hapus data lama terlebih dahulu
-    if (isCorrection && oldStatus) {
+    // 1. Jika ini adalah koreksi dan status lama juga merupakan status yang dicatat
+    if (isCorrection && oldStatus && statusToRecord.includes(oldStatus)) {
         const oldStudentData = {
             nisn: nisn,
             nama: nama,
             nomorAbsen: nomorAbsen || 0,
-            status: oldStatus
+            status: oldStatus // Gunakan oldStatus di sini
         };
+        // Hapus data siswa dengan status lama dari array
         batch.update(recapRef, { siswa: firebase.firestore.FieldValue.arrayRemove(oldStudentData) });
     }
     
-    // Tambahkan data baru jika statusnya tidak hadir
-    if (['Sakit', 'Izin', 'Tanpa Keterangan'].includes(status)) {
+    // 2. Tambahkan atau perbarui data baru jika statusnya adalah salah satu yang ingin dicatat
+    if (statusToRecord.includes(status)) {
+        // Pastikan dokumen ada, atau buat jika belum ada
         batch.set(recapRef, { tanggal: tanggal, kelas: kelas }, { merge: true });
+        // Tambahkan data siswa dengan status baru ke array
         batch.update(recapRef, { siswa: firebase.firestore.FieldValue.arrayUnion(studentData) });
     }
+    // Jika statusnya bukan Sakit/Izin/Tanpa Keterangan (misal Hadir/Masuk/Pulang)
+    // dan ini bukan koreksi dari status ketidakhadiran, maka tidak perlu melakukan apa-apa.
+    // Jika ini adalah koreksi dari Sakit/Izin/Tanpa Keterangan menjadi Hadir/Masuk/Pulang,
+    // maka langkah arrayRemove sudah menghapusnya, dan langkah arrayUnion tidak akan menambahkannya lagi.
 }
 
 /**
@@ -2764,6 +2854,649 @@ async function updateSemesterCache(batch, data) {
             [newField]: firebase.firestore.FieldValue.increment(1),
             detailAbsensi: firebase.firestore.FieldValue.arrayUnion(newDetailObject)
         });
+    }
+}
+    // =================================================================
+    // --- [FITUR NILAI] FUNGSI-FUNGSI BARU ---
+    // =================================================================
+    function showNilaiSelectionView() {
+        hideAllMainContentAreas();
+        const mainContent = document.getElementById('main-content-area');
+        mainContent.style.display = 'block';
+
+        // --- LOGIKA BARU DIMULAI DI SINI ---
+        const kelasSaatIni = parseInt(currentUser.kelasDiampu);
+
+        // Membuat opsi dropdown kelas lampau secara dinamis
+        let opsiKelasLampau = '';
+        for (let i = 1; i < kelasSaatIni; i++) {
+            opsiKelasLampau += `<option value="${i}">Kelas ${i}</option>`;
+        }
+
+        // Mendapatkan data semester berjalan untuk ditampilkan di kartu atas
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        const semester = (currentMonth >= 7 && currentMonth <= 12) ? 1 : 2;
+        const tahunAjaran = (semester === 1) ? `${currentYear}/${currentYear + 1}` : `${currentYear - 1}/${currentYear}`;
+        const semesterText = (semester === 1) ? `Ganjil ${tahunAjaran}` : `Genap ${tahunAjaran}`;
+
+        mainContent.innerHTML = `
+            <div id="nilai-selection-view">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold text-primary"><i class="fas fa-edit mr-2"></i>Semester Berjalan</h5>
+                        <p class="card-text text-muted">Klik untuk mulai mengisi nilai rapor untuk siswa kelas ${currentUser.kelasDiampu} Anda saat ini.</p>
+                        <button id="btn-input-nilai-sekarang" class="btn btn-primary">
+                            Input Nilai Semester ${semesterText}
+                        </button>
+                    </div>
+                </div>
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title font-weight-bold"><i class="fas fa-history mr-2"></i>Isi Riwayat Nilai Siswa Saat Ini</h5>
+                        <p class="card-text text-muted">Fitur ini untuk mengisi nilai siswa <strong>kelas ${currentUser.kelasDiampu} Anda</strong> saat mereka berada di tingkat kelas sebelumnya.</p>
+                        <div class="form-row align-items-end">
+                            <div class="col-md-4 mb-2">
+                                <label for="select-kelas-lampau">Pilih Tingkat Kelas Lampau</label>
+                                <select id="select-kelas-lampau" class="form-control">
+                                    ${opsiKelasLampau}
+                                </select>
+                            </div>
+                            <div class="col-md-3 mb-2">
+                                <label for="select-semester-lampau">Pilih Semester</label>
+                                <select id="select-semester-lampau" class="form-control">
+                                    <option value="1">Ganjil</option>
+                                    <option value="2">Genap</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 mb-2">
+                                <button id="btn-input-riwayat-nilai" class="btn btn-secondary btn-block">Lanjutkan</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        addNilaiSelectionListeners(); // Panggil fungsi untuk menambahkan event listener
+    }
+
+    // [FITUR NILAI] Menambahkan event listener ke halaman pemilihan nilai
+    function addNilaiSelectionListeners() {
+        // Tombol untuk semester sekarang
+        const btnSekarang = document.getElementById('btn-input-nilai-sekarang');
+        if (btnSekarang) {
+            btnSekarang.addEventListener('click', () => {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth() + 1;
+                const semester = (currentMonth >= 7 && currentMonth <= 12) ? 1 : 2;
+                const tahunAjaran = (semester === 2) ? currentYear - 1 : currentYear;
+                
+                // Panggil fungsi untuk menampilkan halaman input nilai (akan kita buat di langkah berikutnya)
+                showNilaiInputView(currentUser.kelasDiampu, semester, tahunAjaran);
+            });
+        }
+
+        // Tombol untuk data lampau
+        const btnRiwayat = document.getElementById('btn-input-riwayat-nilai');
+        if (btnRiwayat) {
+            btnRiwayat.addEventListener('click', async () => {
+                const kelasLampau = parseInt(document.getElementById('select-kelas-lampau').value);
+                const semester = parseInt(document.getElementById('select-semester-lampau').value);
+                
+                // --- AWAL LOGIKA BARU ---
+                // 1. Dapatkan tahun ajaran awal saat ini
+                const now = new Date();
+                const tahunKalenderSaatIni = now.getFullYear();
+                const bulanSaatIni = now.getMonth() + 1; // getMonth() dari 0-11
+                const tahunAjaranAwalSaatIni = (bulanSaatIni >= 7) ? tahunKalenderSaatIni : tahunKalenderSaatIni - 1;
+                
+                // 2. Hitung selisih tahun
+                const kelasSaatIni = parseInt(currentUser.kelasDiampu);
+                const selisihTahun = kelasSaatIni - kelasLampau;
+                
+                // 3. Tentukan tahun ajaran lampau secara otomatis
+                const tahunAjaran = tahunAjaranAwalSaatIni - selisihTahun;
+                // --- AKHIR LOGIKA BARU ---
+
+                // Ambil daftar siswa yang diajar saat ini
+                const siswaSaatIniSnapshot = await db.collection('siswa')
+                    .where('kelas', '==', currentUser.kelasDiampu)
+                    .where('status', '==', 'Aktif')
+                    .orderBy('nomorAbsen')
+                    .get();
+                const daftarSiswaUntukDiisi = siswaSaatIniSnapshot.docs.map(doc => doc.data());
+
+                // Panggil fungsi input view dengan tahun ajaran yang sudah dihitung otomatis
+                showNilaiInputView(kelasLampau.toString(), semester, tahunAjaran, daftarSiswaUntukDiisi);
+            });
+        }
+    }
+
+    function showNilaiInputView(kelas, semester, tahunAjaran, daftarSiswa = null) {
+        hideAllMainContentAreas(); // Sembunyikan semua konten lain
+        const mainContent = document.getElementById('main-content-area');
+        mainContent.style.display = 'block'; // Tampilkan area konten utama
+
+        const semesterText = semester === 1 ? 'Ganjil' : 'Genap';
+        const tahunAjaranText = `${tahunAjaran}/${tahunAjaran + 1}`;
+
+        // Langsung isi innerHTML dari 'main-content-area'
+        mainContent.innerHTML = `
+            <div id="nilai-input-view">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap mb-3 border-bottom pb-3">
+                            <div>
+                                <h5 class="card-title font-weight-bold text-primary mb-1">Input Nilai Rapor: Kelas ${kelas}</h5>
+                                <p class="text-muted mb-0">Semester ${semesterText} - Tahun Ajaran ${tahunAjaranText}</p>
+                            </div>
+                            <div class="d-flex align-items-center mt-2 mt-md-0">
+                                <div class="text-right mr-3">
+                                    <span id="nilai-progress-text" class="font-weight-bold">Memuat progres...</span>
+                                    <button id="btn-sync-jumlah-siswa" class="btn btn-sm btn-link p-0" title="Sinkronisasi Ulang Jumlah Siswa"><i class="fas fa-sync"></i></button>
+                                </div>
+                                <button id="btn-atur-mapel" class="btn btn-secondary mr-2" title="Atur Mata Pelajaran"><i class="fas fa-cog"></i></button>
+                                <button id="btn-hitung-rata-rata" class="btn btn-success" disabled>
+                                    <i class="fas fa-calculator mr-2"></i>Hitung Rata-rata
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="nilai-student-list-container" class="table-responsive">
+                            <div class="text-center p-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p class="mt-2 text-muted">Memuat daftar siswa...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        loadNilaiInputData(kelas, semester, tahunAjaran, daftarSiswa);
+    }
+
+async function loadNilaiInputData(kelas, semester, tahunAjaran, daftarSiswa = null) {
+    const progressText = document.getElementById('nilai-progress-text');
+    const studentListContainer = document.getElementById('nilai-student-list-container');
+    const hitungBtn = document.getElementById('btn-hitung-rata-rata');
+
+    nilaiState.kelas = kelas;
+    nilaiState.semester = semester;
+    nilaiState.tahunAjaran = tahunAjaran;
+
+    try {
+        const configDocId = `kelas_${kelas}_semester_${semester}_${tahunAjaran}`;
+        const configRef = db.collection('konfigurasi_mapel').doc(configDocId);
+        const configDoc = await configRef.get();
+        
+        nilaiState.konfigurasiMapel = configDoc.exists ? configDoc.data().mapelAktif : daftarMapelMaster;
+        const jumlahMapelAktif = nilaiState.konfigurasiMapel.length;
+
+        if (!daftarSiswa) {
+            const siswaSnapshot = await db.collection('siswa').where('kelas', '==', kelas).where('status', '==', 'Aktif').orderBy('nomorAbsen').get();
+            if (siswaSnapshot.empty) {
+                studentListContainer.innerHTML = `<div class="alert alert-info text-center">Tidak ada siswa aktif di kelas ini.</div>`;
+                progressText.textContent = "Tidak ada siswa";
+                hitungBtn.disabled = true;
+                return;
+            }
+            nilaiState.daftarSiswa = siswaSnapshot.docs.map(doc => doc.data());
+        } else {
+            nilaiState.daftarSiswa = daftarSiswa;
+        }
+        
+        const totalSiswa = nilaiState.daftarSiswa.length;
+        let jumlahLengkap = 0; // Counter baru untuk siswa yang nilainya sudah lengkap
+
+        // Ambil semua data nilai yang sudah ada untuk kelas ini
+        const nilaiSnapshot = await db.collectionGroup('nilai_rapor')
+            .where('kelas', '==', kelas)
+            .where('semester', '==', semester)
+            .where('tahunAjaran', '==', tahunAjaran)
+            .get();
+            
+        const nilaiMap = new Map(nilaiSnapshot.docs.map(doc => [doc.data().nisn, doc.data()]));
+        
+        let tableHtml = `
+            <table class="table table-hover table-bordered table-sm">
+                <thead><tr><th>No. Absen</th><th>Nama Siswa</th><th>Status</th><th class="text-center">Aksi</th></tr></thead>
+                <tbody>
+        `;
+
+        nilaiState.daftarSiswa.forEach(siswa => {
+            const dataNilai = nilaiMap.get(siswa.nisn);
+            let statusText = '❌ Belum Diisi';
+            let isFilled = false;
+
+            if (dataNilai) {
+                // Siswa sudah punya data, cek kelengkapannya
+                const jumlahNilaiDiisi = Object.keys(dataNilai.daftarNilai || {}).length;
+                if (jumlahNilaiDiisi >= jumlahMapelAktif) {
+                    statusText = '✅ Lengkap';
+                    jumlahLengkap++; // Tambahkan ke counter lengkap
+                } else {
+                    statusText = '⚠️ Belum Lengkap';
+                }
+                isFilled = true; // Untuk style tombol
+            }
+            
+            tableHtml += `
+                <tr>
+                    <td>${siswa.nomorAbsen || '-'}</td>
+                    <td>${siswa.nama}</td>
+                    <td>${statusText}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm ${isFilled ? 'btn-outline-warning' : 'btn-warning'} nilai-input-btn" data-nisn="${siswa.nisn}">
+                            ${isFilled ? 'Edit Nilai' : 'Input Nilai'}
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        tableHtml += `</tbody></table>`;
+        studentListContainer.innerHTML = tableHtml;
+
+        // Perbarui tampilan progres dan tombol berdasarkan counter baru
+        progressText.textContent = `${jumlahLengkap} dari ${totalSiswa} siswa telah lengkap.`;
+        hitungBtn.disabled = (jumlahLengkap !== totalSiswa);
+
+        // Perbarui juga dokumen status di Firestore agar progres tersimpan
+        const statusDocId = `kelas_${kelas}_semester_${semester}_${tahunAjaran}`;
+        const statusRef = db.collection('status_input_nilai').doc(statusDocId);
+        await statusRef.set({
+            totalSiswa: totalSiswa,
+            sudahDiisi: jumlahLengkap // 'sudahDiisi' sekarang berarti 'jumlahLengkap'
+        }, { merge: true });
+
+        addNilaiInputListeners();
+
+    } catch (error) {
+        console.error("Error loading nilai input data:", error);
+        studentListContainer.innerHTML = `<div class="alert alert-danger">Gagal memuat data siswa: ${error.message}</div>`;
+        progressText.textContent = "Gagal memuat";
+    }
+}
+    
+// =================================================================
+// --- [FITUR NILAI] FUNGSI-FUNGSI UTAMA (LANJUTAN) ---
+// =================================================================
+
+// Fungsi yang dipanggil dari showNilaiInputView untuk mengaktifkan semua tombol
+function addNilaiInputListeners() {
+    const aturMapelBtn = document.getElementById('btn-atur-mapel');
+    const studentListContainer = document.getElementById('nilai-student-list-container');
+    const saveMapelBtn = document.getElementById('saveMapelConfigBtn');
+    const saveNilaiBtn = document.getElementById('saveNilaiSiswaBtn');
+    const syncBtn = document.getElementById('btn-sync-jumlah-siswa'); // <-- Tambahan
+    const hitungBtn = document.getElementById('btn-hitung-rata-rata'); // <-- Tambahan
+
+    if (aturMapelBtn) {
+        aturMapelBtn.addEventListener('click', openKonfigurasiMapelModal);
+    }
+    if (studentListContainer) {
+        studentListContainer.addEventListener('click', (e) => {
+            const targetButton = e.target.closest('.nilai-input-btn');
+            if (targetButton) {
+                const nisn = targetButton.dataset.nisn;
+                const siswa = nilaiState.daftarSiswa.find(s => s.nisn === nisn);
+                if (siswa) {
+                    nilaiState.siswaSedangDiedit = siswa;
+                    openInputNilaiModal();
+                }
+            }
+        });
+    }
+    if (saveMapelBtn) {
+        saveMapelBtn.addEventListener('click', saveMapelConfiguration);
+    }
+    if (saveNilaiBtn) {
+        saveNilaiBtn.addEventListener('click', saveNilaiSiswa);
+    }
+    // Listener untuk tombol sinkronisasi (BARU)
+    if (syncBtn) {
+        syncBtn.addEventListener('click', syncJumlahSiswa);
+    }
+    // Listener untuk tombol hitung rata-rata (BARU)
+    if (hitungBtn) {
+        hitungBtn.addEventListener('click', hitungDanSimpanRataRataKelas);
+    }
+}
+
+// Fungsi untuk membuka modal konfigurasi mapel
+async function openKonfigurasiMapelModal() {
+    const mapelListContainer = document.getElementById('mapel-list-container');
+    mapelListContainer.innerHTML = '<div class="spinner-border spinner-border-sm"></div>';
+    $('#konfigurasiMapelModal').modal('show');
+
+    // Cek apakah sudah ada konfigurasi tersimpan
+    const configDocId = `kelas_${nilaiState.kelas}_semester_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+    const configRef = db.collection('konfigurasi_mapel').doc(configDocId);
+    const configDoc = await configRef.get();
+    
+    let mapelAktif = daftarMapelMaster; // Default: semua mapel aktif
+    if (configDoc.exists) {
+        mapelAktif = configDoc.data().mapelAktif;
+    }
+    nilaiState.konfigurasiMapel = mapelAktif; // Simpan konfigurasi saat ini
+
+    let html = '<div class="row">';
+    daftarMapelMaster.forEach(mapel => {
+        const isChecked = mapelAktif.includes(mapel);
+        html += `
+            <div class="col-md-6 col-lg-4">
+                <div class="custom-control custom-switch my-2">
+                    <input type="checkbox" class="custom-control-input" id="switch-${mapel.replace(/\s+/g, '')}" value="${mapel}" ${isChecked ? 'checked' : ''}>
+                    <label class="custom-control-label" for="switch-${mapel.replace(/\s+/g, '')}">${mapel}</label>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    mapelListContainer.innerHTML = html;
+}
+
+// Fungsi untuk membuka modal input nilai untuk satu siswa
+async function openInputNilaiModal() {
+    const siswa = nilaiState.siswaSedangDiedit;
+    document.getElementById('inputNilaiModalTitle').textContent = `Input Nilai - ${siswa.nama}`;
+    const formContainer = document.getElementById('form-nilai-container');
+    const linkPdfInput = document.getElementById('link-pdf-rapor');
+    
+    // Reset form
+    formContainer.innerHTML = `<div class="text-center"><div class="spinner-border spinner-border-sm"></div> <p>Memuat formulir...</p></div>`;
+    linkPdfInput.value = '';
+    
+    $('#inputNilaiModal').modal('show');
+
+    // Ambil data nilai yang sudah ada (jika ada)
+    const nilaiDocId = `${siswa.nisn}_${nilaiState.kelas}_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+    const nilaiRef = db.collection('siswa').doc(siswa.nisn).collection('nilai_rapor').doc(nilaiDocId);
+    const nilaiDoc = await nilaiRef.get();
+    const dataNilai = nilaiDoc.exists ? nilaiDoc.data() : {};
+    
+    let formHtml = '';
+    nilaiState.konfigurasiMapel.forEach(mapel => {
+        const nilai = dataNilai.daftarNilai ? (dataNilai.daftarNilai[mapel] || '') : '';
+        formHtml += `
+            <div class="form-group row">
+                <label class="col-sm-4 col-form-label">${mapel}</label>
+                <div class="col-sm-8">
+                    <input type="number" class="form-control nilai-mapel-input" data-mapel="${mapel}" value="${nilai}" min="0" max="100">
+                </div>
+            </div>
+        `;
+    });
+    
+    // --- AWAL LOGIKA BARU ---
+    // Tambahkan input link rapor, dan link ijazah jika kondisinya sesuai
+    formHtml += `<hr>`;
+    formHtml += `
+        <div class="form-group">
+            <label for="link-pdf-rapor"><strong>Link Unduh Rapor (PDF)</strong></label>
+            <input type="url" id="link-pdf-rapor" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini" value="${dataNilai.linkPDF || ''}">
+        </div>
+    `;
+
+    // Cek apakah ini Kelas 6 dan Semester 2
+    if (nilaiState.kelas === '6' && nilaiState.semester === 2) {
+        formHtml += `
+            <div class="form-group">
+                <label for="link-pdf-ijazah"><strong>Link Ijazah (PDF)</strong> <span class="badge badge-success">Khusus Kelas 6</span></label>
+                <input type="url" id="link-pdf-ijazah" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini" value="${dataNilai.linkIjazah || ''}">
+            </div>
+        `;
+    }
+    // --- AKHIR LOGIKA BARU ---
+    
+    // Tampilkan semua elemen form yang sudah dibuat
+    formContainer.innerHTML = formHtml;
+    // Hapus baris ini karena link rapor sudah dimasukkan dalam blok HTML di atas
+    // linkPdfInput.value = dataNilai.linkPDF || '';
+}
+
+async function saveMapelConfiguration() {
+    const saveBtn = document.getElementById('saveMapelConfigBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
+
+    // Ambil semua mapel yang dicentang
+    const mapelAktifBaru = [];
+    document.querySelectorAll('#mapel-list-container .custom-control-input').forEach(checkbox => {
+        if (checkbox.checked) {
+            mapelAktifBaru.push(checkbox.value);
+        }
+    });
+
+    try {
+        const configDocId = `kelas_${nilaiState.kelas}_semester_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+        const configRef = db.collection('konfigurasi_mapel').doc(configDocId);
+
+        // Simpan konfigurasi baru ke Firestore
+        await configRef.set({
+            mapelAktif: mapelAktifBaru
+        });
+
+        // Update state lokal agar langsung bisa digunakan
+        nilaiState.konfigurasiMapel = mapelAktifBaru;
+
+        Toastify({ text: "Pengaturan mata pelajaran berhasil disimpan!", style: { background: "green" } }).showToast();
+        $('#konfigurasiMapelModal').modal('hide');
+
+    } catch (error) {
+        console.error("Error saving mapel config:", error);
+        Toastify({ text: `Gagal menyimpan: ${error.message}`, style: { background: "red" } }).showToast();
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Simpan Pengaturan';
+    }
+}
+
+async function saveNilaiSiswa() {
+    const saveBtn = document.getElementById('saveNilaiSiswaBtn');
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menyimpan...';
+
+    try {
+        const siswa = nilaiState.siswaSedangDiedit;
+        
+        // --- AWAL LOGIKA BARU ---
+        // Ambil data dari semua input yang mungkin ada
+        const linkPDF = document.getElementById('link-pdf-rapor').value;
+        const linkIjazahInput = document.getElementById('link-pdf-ijazah'); // Cek apakah elemen ini ada
+        const linkIjazah = linkIjazahInput ? linkIjazahInput.value : null; // Ambil nilainya jika ada
+        // --- AKHIR LOGIKA BARU ---
+        
+        const daftarNilai = {};
+        const nilaiInputs = document.querySelectorAll('#form-nilai-container .nilai-mapel-input');
+        nilaiInputs.forEach(input => {
+            const mapel = input.dataset.mapel;
+            const nilai = input.value;
+            if (nilai && nilai.trim() !== '') { 
+                daftarNilai[mapel] = parseInt(nilai);
+            }
+        });
+
+        const semuaNilai = Object.values(daftarNilai);
+        let nilaiRataRata = 0;
+        if (semuaNilai.length > 0) {
+            const totalNilai = semuaNilai.reduce((sum, current) => sum + current, 0);
+            nilaiRataRata = parseFloat((totalNilai / semuaNilai.length).toFixed(2));
+        }
+
+        const nilaiDocId = `${siswa.nisn}_${nilaiState.kelas}_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+        const nilaiRef = db.collection('siswa').doc(siswa.nisn).collection('nilai_rapor').doc(nilaiDocId);
+        
+        // Siapkan data untuk disimpan
+        const dataToSave = {
+            nisn: siswa.nisn,
+            nama: siswa.nama,
+            kelas: nilaiState.kelas,
+            semester: nilaiState.semester,
+            tahunAjaran: nilaiState.tahunAjaran,
+            daftarNilai: daftarNilai,
+            nilaiRataRata: nilaiRataRata,
+            linkPDF: linkPDF
+        };
+
+        // Tambahkan link ijazah ke data jika ada
+        if (linkIjazah !== null) {
+            dataToSave.linkIjazah = linkIjazah;
+        }
+
+        await nilaiRef.set(dataToSave);
+        
+        Toastify({ text: `Nilai untuk ${siswa.nama} berhasil disimpan!`, style: { background: "green" } }).showToast();
+        $('#inputNilaiModal').modal('hide');
+
+        await loadNilaiInputData(nilaiState.kelas, nilaiState.semester, nilaiState.tahunAjaran, nilaiState.daftarSiswa);
+
+    } catch (error) {
+        console.error("Error saving nilai siswa:", error);
+        Toastify({ text: `Gagal menyimpan nilai: ${error.message}`, style: { background: "red" } }).showToast();
+    } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'Simpan Nilai';
+    }
+}
+
+async function syncJumlahSiswa() {
+    const syncBtn = document.getElementById('btn-sync-jumlah-siswa');
+    const originalIcon = syncBtn.innerHTML;
+    syncBtn.innerHTML = `<span class="spinner-border spinner-border-sm"></span>`;
+    syncBtn.disabled = true;
+
+    try {
+        const { kelas, semester, tahunAjaran } = nilaiState;
+        
+        // 1. Hitung ulang jumlah siswa aktif yang sebenarnya
+        const siswaSnapshot = await db.collection('siswa')
+            .where('kelas', '==', kelas)
+            .where('status', '==', 'Aktif')
+            .get();
+        const totalSiswaAktual = siswaSnapshot.size;
+
+        // 2. Perbarui dokumen penghitung
+        const statusDocId = `kelas_${kelas}_semester_${semester}_${tahunAjaran}`;
+        const statusRef = db.collection('status_input_nilai').doc(statusDocId);
+        const statusDoc = await statusRef.get();
+        
+        const sudahDiisi = statusDoc.exists ? statusDoc.data().sudahDiisi || 0 : 0;
+        const belumDiisi = totalSiswaAktual - sudahDiisi;
+
+        await statusRef.set({
+            totalSiswa: totalSiswaAktual,
+            sudahDiisi: sudahDiisi,
+            belumDiisi: belumDiisi
+        }, { merge: true });
+
+        Toastify({ text: "Jumlah siswa berhasil disinkronkan!", style: { background: "blue" } }).showToast();
+        
+        // Muat ulang data untuk me-refresh tampilan
+        await loadNilaiInputData(kelas, semester, tahunAjaran);
+
+    } catch (error) {
+        console.error("Error syncing student count:", error);
+        Toastify({ text: `Gagal sinkronisasi: ${error.message}`, style: { background: "red" } }).showToast();
+    } finally {
+        syncBtn.innerHTML = originalIcon;
+        syncBtn.disabled = false;
+    }
+}
+
+// GANTI FUNGSI LAMA DENGAN KODE LENGKAP INI
+async function hitungDanSimpanRataRataKelas() {
+    const hitungBtn = document.getElementById('btn-hitung-rata-rata');
+    hitungBtn.disabled = true;
+    hitungBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Menghitung...';
+
+    try {
+        const { kelas, semester, tahunAjaran, daftarSiswa } = nilaiState;
+        const nisnSiswa = daftarSiswa.map(s => s.nisn);
+
+        // =====================================================================
+        // ==== AWAL LOGIKA BARU (CHUNKING) ====================================
+        // =====================================================================
+
+        const rekapNilai = {}; // { Matematika: [90, 85, 88], ... }
+        const promises = [];
+        
+        // Pecah 'nisnSiswa' menjadi kelompok-kelompok berisi 10
+        for (let i = 0; i < nisnSiswa.length; i += 10) {
+            const chunk = nisnSiswa.slice(i, i + 10);
+            
+            // Siapkan query untuk setiap kelompok
+            const query = db.collectionGroup('nilai_rapor')
+                .where('kelas', '==', kelas)
+                .where('semester', '==', semester)
+                .where('tahunAjaran', '==', tahunAjaran)
+                .where('nisn', 'in', chunk);
+            
+            promises.push(query.get());
+        }
+
+        // Jalankan semua query secara paralel dan tunggu hasilnya
+        const snapshotResults = await Promise.all(promises);
+
+        // Gabungkan hasil dari semua query
+        snapshotResults.forEach(snapshot => {
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                for (const mapel in data.daftarNilai) {
+                    if (!rekapNilai[mapel]) {
+                        rekapNilai[mapel] = [];
+                    }
+                    rekapNilai[mapel].push(data.daftarNilai[mapel]);
+                }
+            });
+        });
+        
+        // =====================================================================
+        // ==== AKHIR LOGIKA BARU (CHUNKING) ===================================
+        // =====================================================================
+
+
+        if (Object.keys(rekapNilai).length === 0) {
+            throw new Error("Tidak ditemukan data nilai untuk dihitung.");
+        }
+        
+        // Sisa dari fungsi ini tidak berubah: menghitung rata-rata
+        const rataRataPerMapel = {};
+        let totalSemuaRataRata = 0;
+        let jumlahMapel = 0;
+
+        for (const mapel in rekapNilai) {
+            const totalNilai = rekapNilai[mapel].reduce((sum, current) => sum + current, 0);
+            const rataRata = parseFloat((totalNilai / rekapNilai[mapel].length).toFixed(2));
+            rataRataPerMapel[mapel] = rataRata;
+            totalSemuaRataRata += rataRata;
+            jumlahMapel++;
+        }
+
+        const rataRataKeseluruhan = jumlahMapel > 0 ? parseFloat((totalSemuaRataRata / jumlahMapel).toFixed(2)) : 0;
+
+        // Simpan ke dokumen rekap_nilai_kelas
+        const rekapDocId = `kelas_${kelas}_semester_${semester}_${tahunAjaran}`;
+        const rekapRef = db.collection('rekap_nilai_kelas').doc(rekapDocId);
+        
+        await rekapRef.set({
+            rataRataKeseluruhan: rataRataKeseluruhan,
+            ...rataRataPerMapel
+        });
+        
+        Toastify({ text: "Rata-rata kelas berhasil dihitung dan disimpan!", duration: 5000, style: { background: "green" } }).showToast();
+        
+    } catch (error) {
+        console.error("Error calculating class average:", error);
+        Toastify({ text: `Gagal menghitung: ${error.message}`, style: { background: "red" } }).showToast();
+    } finally {
+        hitungBtn.disabled = false;
+        hitungBtn.innerHTML = '<i class="fas fa-calculator mr-2"></i>Selesaikan & Hitung Rata-rata';
     }
 }
 
