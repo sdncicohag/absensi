@@ -260,16 +260,11 @@
                     <h5 class="modal-title" id="inputNilaiModalTitle">Input Nilai Siswa</h5>
                     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                 </div>
-                <div class="modal-body">
-                    <form id="form-input-nilai">
-                        <div id="form-nilai-container"></div>
-                        <hr>
-                        <div class="form-group">
-                            <label for="link-pdf-rapor"><strong>Link Unduh Rapor (PDF)</strong></label>
-                            <input type="url" id="link-pdf-rapor" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini">
-                        </div>
-                    </form>
-                </div>
+                    <div class="modal-body">
+                        <form id="form-input-nilai">
+                            <div id="form-nilai-container"></div>
+                            </form>
+                    </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
                     <button type="button" id="saveNilaiSiswaBtn" class="btn btn-primary">Simpan Nilai</button>
@@ -424,7 +419,6 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             sidebarDailyCorrectionLink.style.display = isWaliKelas ? 'block' : 'none';
             menuWalikelasOnly.style.display = isWaliKelas ? 'block' : 'none';
             sidebarCatatanHarianLink.style.display = isWaliKelas ? 'block' : 'none';
-            menuNilaiWalikelasOnly.style.display = isWaliKelas ? 'block' : 'none';
                 
     } catch (error) {
         loginError.textContent = error.message;
@@ -3036,17 +3030,28 @@ async function loadNilaiInputData(kelas, semester, tahunAjaran, daftarSiswa = nu
             let statusText = '❌ Belum Diisi';
             let isFilled = false;
 
-            if (dataNilai) {
-                // Siswa sudah punya data, cek kelengkapannya
-                const jumlahNilaiDiisi = Object.keys(dataNilai.daftarNilai || {}).length;
-                if (jumlahNilaiDiisi >= jumlahMapelAktif) {
-                    statusText = '✅ Lengkap';
-                    jumlahLengkap++; // Tambahkan ke counter lengkap
+        if (dataNilai) {
+            isFilled = true; // Ada data, berarti tombolnya 'Edit'
+            const jumlahNilaiDiisi = Object.keys(dataNilai.daftarNilai || {}).length;
+
+            // LOGIKA BARU DIMULAI DI SINI
+            if (jumlahNilaiDiisi >= jumlahMapelAktif) {
+                // 1. Semua nilai mata pelajaran sudah diisi.
+                jumlahLengkap++; // Tetap hitung lengkap untuk tombol "Hitung Rata-rata"
+
+                // 2. Sekarang, periksa link rapornya.
+                if (!dataNilai.linkPDF || dataNilai.linkPDF.trim() === '') {
+                    // Jika nilai lengkap TAPI link rapor kosong
+                    statusText = '🔗 Link Rapor Belum Diisi';
                 } else {
-                    statusText = '⚠️ Belum Lengkap';
+                    // Jika nilai lengkap DAN link rapor ada
+                    statusText = '✅ Lengkap';
                 }
-                isFilled = true; // Untuk style tombol
+            } else {
+                // Jika nilai mata pelajaran belum lengkap
+                statusText = '⚠️ Nilai Belum Lengkap';
             }
+        }
             
             tableHtml += `
                 <tr>
@@ -3169,11 +3174,9 @@ async function openInputNilaiModal() {
     const siswa = nilaiState.siswaSedangDiedit;
     document.getElementById('inputNilaiModalTitle').textContent = `Input Nilai - ${siswa.nama}`;
     const formContainer = document.getElementById('form-nilai-container');
-    const linkPdfInput = document.getElementById('link-pdf-rapor');
     
     // Reset form
     formContainer.innerHTML = `<div class="text-center"><div class="spinner-border spinner-border-sm"></div> <p>Memuat formulir...</p></div>`;
-    linkPdfInput.value = '';
     
     $('#inputNilaiModal').modal('show');
 
