@@ -263,6 +263,16 @@
                             <button id="reset-attendance-data-btn" class="btn btn-danger"><i class="fas fa-exclamation-triangle mr-2"></i> Reset Semua Data Absensi</button>
                         </div>
                     </div>
+                    <div class="card shadow-sm border-danger mt-4">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">Zona Berbahaya (Nilai)</h5>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Reset Data Nilai Rapor</h5>
+                            <p class="card-text">Tindakan ini akan menghapus <strong>SEMUA</strong> data yang berhubungan dengan nilai rapor siswa, termasuk konfigurasi, status, dan rekap kelas.</p>
+                            <button id="reset-nilai-data-btn" class="btn btn-danger"><i class="fas fa-exclamation-triangle mr-2"></i> Reset Semua Data Nilai</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -372,6 +382,25 @@
         </div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button><button type="button" id="confirmDeleteStaffBtn" class="btn btn-danger">Ya, Hapus</button></div>
     </div></div></div>
+    <div class="modal fade" id="resetNilaiConfirmModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Konfirmasi Reset Data Nilai</h5>
+                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>Anda yakin ingin menghapus <strong>SEMUA DATA NILAI RAPOR</strong>? Tindakan ini tidak dapat dipulihkan.</p>
+                    <p>Ketik "<strong>HAPUS NILAI</strong>" pada kolom di bawah untuk konfirmasi.</p>
+                    <input type="text" id="resetNilaiConfirmationInput" class="form-control" placeholder="Ketik di sini untuk konfirmasi">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <button type="button" id="confirmNilaiResetBtn" class="btn btn-danger" disabled>Ya, Saya Yakin & Hapus</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -402,6 +431,30 @@
     let currentClass = null;
     let isBulkEditMode = false;
     let classChart = null;
+
+
+    // --- FUNGSI UNTUK TOGGLE PASSWORD VISIBILITY ---
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    togglePassword.addEventListener('click', function () {
+        // Cek tipe input saat ini
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        // Ganti ikon mata
+        if (type === 'password') {
+            // Jika tipe adalah password, ikonnya adalah mata terbuka
+            toggleIcon.classList.remove('fa-eye-slash');
+            toggleIcon.classList.add('fa-eye');
+        } else {
+            // Jika tipe adalah text, ikonnya adalah mata dicoret
+            toggleIcon.classList.remove('fa-eye');
+            toggleIcon.classList.add('fa-eye-slash');
+        }
+    });
+
 
     // --- Login & Logout Logic ---
     document.getElementById('loginFormAdmin').addEventListener('submit', async (e) => {
@@ -1273,6 +1326,76 @@
             deleteQueryBatch(db, query, resolve);
         }, 0);
     }
+
+    // --- [FITUR NILAI] RESET DATA LOGIC ---
+    document.getElementById('settings-link').addEventListener('click', () => {
+        // Pastikan tombol reset absensi juga ada event listener-nya jika belum
+        if (document.getElementById('reset-attendance-data-btn')) {
+            document.getElementById('reset-attendance-data-btn').addEventListener('click', () => {
+                $('#resetDataConfirmModal').modal('show');
+            });
+        }
+
+        // Tambahkan listener untuk tombol reset nilai yang baru
+        const resetNilaiBtn = document.getElementById('reset-nilai-data-btn');
+        if (resetNilaiBtn) {
+            resetNilaiBtn.addEventListener('click', () => {
+                $('#resetNilaiConfirmModal').modal('show');
+            });
+        }
+    });
+
+    // Listener untuk input konfirmasi reset nilai
+    const resetNilaiInput = document.getElementById('resetNilaiConfirmationInput');
+    if (resetNilaiInput) {
+        resetNilaiInput.addEventListener('keyup', function() {
+            const confirmBtn = document.getElementById('confirmNilaiResetBtn');
+            confirmBtn.disabled = (this.value !== 'HAPUS NILAI');
+        });
+    }
+
+    // Listener untuk tombol konfirmasi akhir reset nilai
+    const confirmNilaiResetBtn = document.getElementById('confirmNilaiResetBtn');
+    if (confirmNilaiResetBtn) {
+        confirmNilaiResetBtn.addEventListener('click', resetNilaiData);
+    }
+
+    // Fungsi utama untuk menghapus semua koleksi nilai
+    async function resetNilaiData() {
+        const btn = $('#confirmNilaiResetBtn');
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Menghapus...');
+        
+        // 1. Hapus semua sub-koleksi 'nilai_rapor' dari setiap siswa
+        try {
+            Toastify({ text: `Memulai proses reset data nilai...`, duration: 3000, style: { background: "blue" } }).showToast();
+            const siswaSnapshot = await db.collection('siswa').get();
+            for (const siswaDoc of siswaSnapshot.docs) {
+                await deleteCollection(db, `siswa/${siswaDoc.id}/nilai_rapor`, 50);
+            }
+
+            // 2. Hapus semua koleksi tingkat atas
+            const collectionsToDelete = [
+                'konfigurasi_mapel',
+                'rekap_nilai_kelas',
+                'status_input_nilai'
+            ];
+            for (const collectionName of collectionsToDelete) {
+                Toastify({ text: `Menghapus koleksi: ${collectionName}...`, duration: 2000, style: { background: "blue" } }).showToast();
+                await deleteCollection(db, collectionName, 50);
+            }
+
+            Toastify({ text: "Semua data nilai berhasil direset!", duration: 5000, style: { background: "green" } }).showToast();
+        } catch (error) {
+            console.error("Error resetting nilai data:", error);
+            Toastify({ text: `Gagal mereset data: ${error.message}`, duration: -1, style: { background: "red" } }).showToast();
+        } finally {
+            btn.prop('disabled', false).text('Ya, Saya Yakin & Hapus');
+            $('#resetNilaiConfirmModal').modal('hide');
+            document.getElementById('resetNilaiConfirmationInput').value = '';
+            btn.prop('disabled', true); // Non-aktifkan kembali setelah selesai
+        }
+    }
+
 
 </script>
 </body>
