@@ -76,24 +76,9 @@
                     <i class="fas fa-home"></i> Dasbor
                 </a>
                 <ul class="collapse list-unstyled show" id="dashboardSubmenu">
-                    <li><a href="#" id="sidebar-quick-summary"><i class="fas fa-chart-line"></i> Ringkasan Hari Ini</a></li>
-                    <li><a href="#" id="sidebar-rekap-harian"><i class="fas fa-calendar-day"></i> Rekap Harian</a></li>
-                    <li id="sidebar-catatan-harian-link"><a href="#" id="sidebar-catatan-harian"><i class="fas fa-book"></i> Catatan Absen Harian</a></li>
-                    <li><a href="#" id="sidebar-cek-usia"><i class="fas fa-birthday-cake"></i> Cek Usia Siswa</a></li>
-                    <li><a href="#" id="sidebar-rekap-semester"><i class="fas fa-chart-bar"></i> Rekap Per Semester</a></li>
+                    <li><a href="#" id="sidebar-quick-summary"><i class="fas fa-chart-line"></i> Ringkasan</a></li>
                 </ul>
             </li>
-                <li id="menu-walikelas-only" style="display:none;">
-                    <a href="#walikelasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
-                        <i class="fas fa-user-tie"></i> Fitur Wali Kelas
-                    </a>
-                    <ul class="collapse list-unstyled" id="walikelasSubmenu">
-                        <li><a href="#" id="sidebar-daftar-siswa"><i class="fas fa-address-book"></i> Daftar Siswa Kelas</a></li>
-                        <li><a href="#" id="sidebar-info-jadwal"><i class="fas fa-calendar-alt"></i> Info & Jadwal Kelas</a></li>
-                        
-                        <li><a href="#" id="sidebar-nilai-semester"><i class="fas fa-keyboard"></i> Input Nilai Rapor</a></li>
-                    </ul>
-                </li>
             <li>
                 <a href="#attendanceSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
                     <i class="fas fa-user-check"></i> Absensi
@@ -101,8 +86,29 @@
                 <ul class="collapse list-unstyled" id="attendanceSubmenu">
                     <li><a href="#" id="sidebar-scan-absensi"><i class="fas fa-qrcode"></i> Scan Absensi</a></li>
                     <li id="sidebar-unscanned-link"><a href="#" id="sidebar-unscanned-btn"><i class="fas fa-user-clock"></i> Siswa Tidak Hadir</a></li>
-                    <li id="sidebar-manual-link"><a href="#" id="sidebar-manual-input-btn"><i class="fas fa-edit"></i> Input Manual</a></li>
-                    <li id="sidebar-daily-correction-link"><a href="#" id="sidebar-daily-correction-btn"><i class="fas fa-sync-alt"></i> Koreksi Ketidakhadiran</a></li>
+                    <li id="sidebar-daily-correction-link"><a href="#" id="sidebar-daily-correction-btn"><i class="fas fa-sync-alt"></i> Koreksi Absensi</a></li>
+                    <li id="sidebar-manual-link"><a href="#" id="sidebar-manual-input-btn"><i class="fas fa-edit"></i> Absensi Manual</a></li>
+                </ul>
+            </li>
+            <li id="menu-walikelas-only" style="display:none;">
+                <a href="#walikelasSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                    <i class="fas fa-user-tie"></i> Fitur Wali Kelas
+                </a>
+                <ul class="collapse list-unstyled" id="walikelasSubmenu">
+                    <li><a href="#" id="sidebar-daftar-siswa"><i class="fas fa-address-book"></i> Daftar Siswa</a></li>
+                    <li><a href="#" id="sidebar-cek-usia"><i class="fas fa-birthday-cake"></i> Cek Usia Siswa</a></li>
+                    <li><a href="#" id="sidebar-info-jadwal"><i class="fas fa-calendar-alt"></i> Info & Jadwal Kelas</a></li>
+                    <li><a href="#" id="sidebar-nilai-semester"><i class="fas fa-keyboard"></i> Input Nilai Rapor</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#rekapitulasiSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                    <i class="fas fa-user-check"></i> Rekapitulasi
+                </a>
+                <ul class="collapse list-unstyled" id="rekapitulasiSubmenu">
+                    <li><a href="#" id="sidebar-rekap-harian"><i class="fas fa-calendar-day"></i> Rekap Harian</a></li>
+                    <li><a href="#" id="sidebar-rekap-semester"><i class="fas fa-chart-bar"></i> Rekap Per Semester</a></li>
+                    <li id="sidebar-catatan-harian-link"><a href="#" id="sidebar-catatan-harian"><i class="fas fa-book"></i> Catatan Absen Harian</a></li>
                 </ul>
             </li>
         </ul>
@@ -212,20 +218,29 @@
                 <div class="col-md-6 form-group"><label>Nomor Absen</label><input type="number" id="editSiswaNomorAbsen" class="form-control"></div>
                 <div class="col-md-6 form-group"><label>Nama Orang Tua</label><input type="text" id="editSiswaNamaOrtu" class="form-control"></div>
                 <div class="col-md-6 form-group"><label>Nomor WhatsApp</label><input type="text" id="editSiswaNomorWa" class="form-control"></div>
+                <div class="col-md-6 form-group"><label>Tanggal Lahir</label><input type="text" id="editSiswatglLahir" class="form-control"></div>
             </div>
         </form></div>
         <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button><button type="button" id="saveSiswaInfoBtn" class="btn btn-primary">Simpan</button></div>
     </div></div></div>
-    <div class="modal fade" id="editJadwalModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content">
-        <div class="modal-header"><h5 class="modal-title">Edit Info & Jadwal Kelas</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
-        <div class="modal-body">
-            <p class="text-muted">Gunakan format yang disarankan untuk hasil terbaik. Pisahkan setiap item dengan baris baru (Enter).</p>
-            <div class="form-group"><label><strong>Jadwal Pelajaran</strong> (Contoh: Senin: Upacara, Tematik)</label><textarea id="editJadwalPelajaran" class="form-control" rows="6"></textarea></div>
-            <div class="form-group"><label><strong>Jadwal Piket</strong> (Contoh: Senin: Budi, Ani)</label><textarea id="editJadwalPiket" class="form-control" rows="6"></textarea></div>
-            <div class="form-group"><label><strong>Jadwal Seragam</strong> (Contoh: Senin: Merah Putih)</label><textarea id="editJadwalSeragam" class="form-control" rows="6"></textarea></div>
+    <div class="modal fade" id="editJadwalModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable"> <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Info & Jadwal Kelas</h5>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">Ketuk pada nama hari untuk membuka atau menutup form isian.</p>
+                        <div class="accordion" id="jadwalAccordion">
+                            </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="button" id="saveJadwalBtn" class="btn btn-primary">Simpan Jadwal</button>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button><button type="button" id="saveJadwalBtn" class="btn btn-primary">Simpan Jadwal</button></div>
-    </div></div></div>
     <div class="modal fade" id="reorderModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content">
         <div class="modal-header"><h5 class="modal-title">Urutkan Nomor Absen</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
         <div class="modal-body">
@@ -809,14 +824,17 @@ function showQuickSummary() {
     function renderDaftarSiswa(students, editMode = false) {
         const container = document.getElementById('siswa-table-wrapper');
         let tableHtml = `<table class="table table-hover table-sm">
-                            <thead><tr><th>No. Absen</th><th>Nama</th><th>NISN</th><th>Nama Ortu</th><th>No. WA</th><th>Status</th><th>Aksi</th></tr></thead>
+                            <thead><tr><th>No</th><th>Nama</th><th>NISN</th><th>Nama Ortu</th><th>No. WA</th><th>Tanggal Lahir</th><th>Status</th><th>Aksi</th></tr></thead>
                             <tbody>`;
         
         if (students.length === 0) {
             tableHtml += '<tr><td colspan="7" class="text-center">Tidak ada siswa aktif di kelas ini.</td></tr>';
         } else {
             students.forEach(siswa => {
-                tableHtml += `<tr data-nisn="${siswa.nisn}">`;
+                const isIncomplete = !siswa.namaOrtu || !siswa.nomorWa || !siswa.tglLahir;
+                const rowClass = isIncomplete ? 'table-warning' : '';
+
+                tableHtml += `<tr data-nisn="${siswa.nisn}" class="${rowClass}">`;
                 if(editMode) {
                     tableHtml += `
                         <td><input type="number" class="form-control form-control-sm edit-nomorAbsen" value="${siswa.nomorAbsen || ''}"></td>
@@ -824,6 +842,7 @@ function showQuickSummary() {
                         <td>${siswa.nisn}</td>
                         <td><input type="text" class="form-control form-control-sm edit-namaOrtu" value="${siswa.namaOrtu || ''}"></td>
                         <td><input type="text" class="form-control form-control-sm edit-nomorWa" value="${siswa.nomorWa || ''}"></td>
+                        <td><input type="text" class="form-control form-control-sm edit-tglLahir" value="${siswa.tglLahir || ''}"></td>
                         <td><span class="badge badge-${siswa.status === 'Aktif' ? 'success' : 'secondary'}">${siswa.status}</span></td>
                         <td>-</td>`;
                 } else {
@@ -833,6 +852,7 @@ function showQuickSummary() {
                         <td>${siswa.nisn}</td>
                         <td>${siswa.namaOrtu || '-'}</td>
                         <td>${siswa.nomorWa || '-'}</td>
+                        <td>${siswa.tglLahir || '-'}</td>
                         <td><span class="badge badge-${siswa.status === 'Aktif' ? 'success' : 'secondary'}">${siswa.status}</span></td>
                         <td><button class="btn btn-sm btn-warning edit-siswa-info-btn" data-nisn="${siswa.nisn}"><i class="fas fa-edit"></i></button></td>`;
                 }
@@ -844,59 +864,164 @@ function showQuickSummary() {
     }
 
 
+// GANTI FUNGSI showInfoJadwalView() DENGAN INI
+async function showInfoJadwalView() {
+    hideAllMainContentAreas();
+    mainContentArea.style.display = 'block';
+    mainContentArea.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat info & jadwal...</p></div>';
 
-    // --- FITUR BARU: INFO & JADWAL KELAS ---
-    async function showInfoJadwalView() {
-        hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
-        mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
-        mainContentArea.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat info & jadwal...</p></div>';
+    try {
+        const docRef = db.collection('info_kelas').doc(currentUser.kelasDiampu);
+        const docSnap = await docRef.get();
+        const data = docSnap.exists ? docSnap.data() : {};
+        const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 
-        try {
-            const docRef = db.collection('info_kelas').doc(currentUser.kelasDiampu);
-            const docSnap = await docRef.get();
-            const data = docSnap.exists ? docSnap.data() : {};
+        // Membuat tabel untuk menampilkan data
+        let tableHtml = `
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Info & Jadwal - Kelas ${currentUser.kelasDiampu}</h5>
+                    <button class="btn btn-primary" id="edit-jadwal-btn"><i class="fas fa-edit mr-2"></i></button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-light text-center">
+                                <tr>
+                                    <th>Hari</th>
+                                    <th>Jadwal Pelajaran</th>
+                                    <th>Jadwal Piket</th>
+                                    <th>Seragam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+        `;
 
-            const parseData = (textData) => {
-                if (!textData) return '<li>Belum ada data.</li>';
-                return textData.split('\n').map(item => `<li class="list-group-item">${item}</li>`).join('');
-            };
+        hari.forEach(day => {
+            // Gunakan optional chaining (?.) untuk mencegah error jika data belum ada
+            const pelajaran = data.pelajaran?.[day] || '-';
+            const piket = data.piket?.[day] || '-';
+            const seragam = data.seragam?.[day] || '-';
+            tableHtml += `
+                <tr>
+                    <td class="font-weight-bold">${day}</td>
+                    <td>${pelajaran}</td>
+                    <td>${piket}</td>
+                    <td>${seragam}</td>
+                </tr>
+            `;
+        });
 
-            mainContentArea.innerHTML = `
-                <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Info & Jadwal - Kelas ${currentUser.kelasDiampu}</h5>
-                        <button class="btn btn-primary" id="edit-jadwal-btn"><i class="fas fa-edit"></i></button>
+        tableHtml += `
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100"><div class="card-body">
-                                    <h6 class="card-title font-weight-bold">Jadwal Pelajaran</h6>
-                                    <ul class="list-group list-group-flush" id="display-jadwal-pelajaran">${parseData(data.pelajaran)}</ul>
-                                </div></div>
+                </div>
+            </div>
+        `;
+        mainContentArea.innerHTML = tableHtml;
+        
+        // Simpan data mentah untuk digunakan saat tombol edit diklik
+        $('#edit-jadwal-btn').data('raw-data', data);
+
+    } catch (error) {
+         mainContentArea.innerHTML = `<div class="alert alert-danger">Gagal memuat jadwal: ${error.message}</div>`;
+    }
+}
+
+
+    // GANTI FUNGSI UNTUK EVENT LISTENER TOMBOL EDIT JADWAL DENGAN INI
+    $(document).on('click', '#edit-jadwal-btn', function() {
+        const data = $(this).data('raw-data') || {};
+        const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const accordionContainer = $('#jadwalAccordion');
+        
+        // Kosongkan kontainer sebelum mengisi ulang
+        accordionContainer.html('');
+
+        // Loop untuk setiap hari dan buat satu bagian akordeon
+        hari.forEach((day, index) => {
+            const dayId = day.toLowerCase();
+            // Ambil data yang ada untuk hari ini
+            const pelajaranValue = data.pelajaran?.[day] || '';
+            const piketValue = data.piket?.[day] || '';
+            const seragamValue = data.seragam?.[day] || '';
+
+            // Tentukan apakah bagian ini harus terbuka secara default (misalnya hari Senin)
+            const isShown = index === 0 ? 'show' : '';
+
+            const accordionItemHtml = `
+                <div class="card mb-2">
+                    <div class="card-header" id="heading-${dayId}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapse-${dayId}">
+                                <strong>${day}</strong>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                        </h2>
+                    </div>
+                    <div id="collapse-${dayId}" class="collapse ${isShown}" data-parent="#jadwalAccordion">
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label for="jadwal-pelajaran-${dayId}" class="font-weight-bold small">Jadwal Pelajaran</label>
+                                <input type="text" class="form-control" id="jadwal-pelajaran-${dayId}" value="${pelajaranValue}" placeholder="cth: IPAS, Matematika">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100"><div class="card-body">
-                                    <h6 class="card-title font-weight-bold">Jadwal Piket</h6>
-                                    <ul class="list-group list-group-flush" id="display-jadwal-piket">${parseData(data.piket)}</ul>
-                                </div></div>
+                            <div class="form-group">
+                                <label for="jadwal-piket-${dayId}" class="font-weight-bold small">Jadwal Piket</label>
+                                <input type="text" class="form-control" id="jadwal-piket-${dayId}" value="${piketValue}" placeholder="cth: Budi, Ani, Aisyah">
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <div class="card h-100"><div class="card-body">
-                                    <h6 class="card-title font-weight-bold">Jadwal Seragam</h6>
-                                    <ul class="list-group list-group-flush" id="display-jadwal-seragam">${parseData(data.seragam)}</ul>
-                                </div></div>
+                            <div class="form-group">
+                                <label for="jadwal-seragam-${dayId}" class="font-weight-bold small">Seragam</label>
+                                <input type="text" class="form-control" id="jadwal-seragam-${dayId}" value="${seragamValue}" placeholder="cth: Merah Putih">
                             </div>
                         </div>
                     </div>
-                </div>`;
-            
-            $('#edit-jadwal-btn').data('raw-data', data);
+                </div>
+            `;
+            accordionContainer.append(accordionItemHtml);
+        });
 
+        // Tampilkan modal setelah akordeon selesai dibuat
+        $('#editJadwalModal').modal('show');
+    });
+
+
+    // GANTI FUNGSI UNTUK EVENT LISTENER TOMBOL SIMPAN JADWAL DENGAN INI
+    $('#saveJadwalBtn').on('click', async function() {
+        const btn = $(this);
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
+        
+        const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+        const pelajaranData = {};
+        const piketData = {};
+        const seragamData = {};
+
+        // Kumpulkan data dari setiap input di modal
+        hari.forEach(day => {
+            const dayId = day.toLowerCase();
+            pelajaranData[day] = $(`#jadwal-pelajaran-${dayId}`).val().trim();
+            piketData[day] = $(`#jadwal-piket-${dayId}`).val().trim();
+            seragamData[day] = $(`#jadwal-seragam-${dayId}`).val().trim();
+        });
+
+        const dataToUpdate = {
+            pelajaran: pelajaranData,
+            piket: piketData,
+            seragam: seragamData
+        };
+
+        try {
+            await db.collection('info_kelas').doc(currentUser.kelasDiampu).set(dataToUpdate, { merge: true });
+            Toastify({ text: "Jadwal berhasil disimpan!", style: { background: "green" } }).showToast();
+            $('#editJadwalModal').modal('hide');
+            showInfoJadwalView(); // Muat ulang tampilan untuk menampilkan data baru
         } catch (error) {
-             mainContentArea.innerHTML = `<div class="alert alert-danger">Gagal memuat jadwal: ${error.message}</div>`;
+            Toastify({ text: `Error: ${error.message}`, style: { background: "red" } }).showToast();
+        } finally {
+            btn.prop('disabled', false).text('Simpan Jadwal');
         }
-    }
+    });
+
     
     // --- Modal & Save Logic for New Features ---
     $(document).on('click', '.edit-siswa-info-btn', function() {
@@ -908,6 +1033,7 @@ function showQuickSummary() {
             $('#editSiswaNomorAbsen').val(siswa.nomorAbsen);
             $('#editSiswaNamaOrtu').val(siswa.namaOrtu);
             $('#editSiswaNomorWa').val(siswa.nomorWa);
+            $('#editSiswatglLahir').val(siswa.tglLahir);
             
             const statusSelect = $('#editSiswaStatus');
             statusSelect.html('<option value="Aktif">Aktif</option><option value="Pindah">Pindah</option>');
@@ -933,6 +1059,7 @@ function showQuickSummary() {
             nomorAbsen: (newStatus === 'Aktif') ? parseInt($('#editSiswaNomorAbsen').val()) || null : null,
             namaOrtu: $('#editSiswaNamaOrtu').val(),
             nomorWa: $('#editSiswaNomorWa').val(),
+            tglLahir: $('#editSiswatglLahir').val(),
             status: newStatus
         };
 
@@ -1096,9 +1223,8 @@ function showQuickSummary() {
 
 
 function showRekapSemesterSelection() {
-    hideAllMainContentAreas(); // Panggil fungsi sembunyikan yang baru
-    mainContentArea.style.display = 'block'; // Tampilkan mainContentArea
-    // dailySummaryDisplay.style.display = 'none'; // Ini tidak lagi diperlukan karena hideAllMainContentAreas sudah menangani
+    hideAllMainContentAreas();
+    mainContentArea.style.display = 'block';
 
     mainContentArea.innerHTML = `
         <div id="semester-selection-card" class="card card-body mt-4">
@@ -1108,13 +1234,19 @@ function showRekapSemesterSelection() {
                 <li class="nav-item"><a class="nav-link" id="semester2-tab" data-toggle="pill" href="#semester2Content" role="tab">Semester 2 (Jan - Juni)</a></li>
             </ul>
             <div class="tab-content" id="semesterTabContent">
-                <div class="tab-pane fade show active" id="semester1Content" role="tabpanel"><div id="rekap-content-semester1" class="mt-3"></div></div>
-                <div class="tab-pane fade" id="semester2Content" role="tabpanel"><div id="rekap-content-semester2" class="mt-3"></div></div>
+                <div class="tab-pane fade show active" id="semester1Content" role="tabpanel">
+                    <div id="rekap-semester-view-container-1" class="mt-3"></div>
+                </div>
+                <div class="tab-pane fade" id="semester2Content" role="tabpanel">
+                    <div id="rekap-semester-view-container-2" class="mt-3"></div>
+                </div>
             </div>
         </div>`;
     
     $('#semester1-tab').on('shown.bs.tab', () => fetchRekap(1));
     $('#semester2-tab').on('shown.bs.tab', () => fetchRekap(2));
+    
+    // Secara default, muat rekap untuk semester 1
     fetchRekap(1);
 }
 
@@ -1943,14 +2075,17 @@ async function renderDailySummary() {
 // Sekarang akan dirender di 'rekap-content' atau 'mainContentArea'
 // =================================================================
 
+// GANTI FUNGSI fetchRekap() DENGAN VERSI FINAL INI
 async function fetchRekap(semester) {
-    const rekapContentDiv = document.getElementById('rekap-content-semester' + semester);
-    rekapContentDiv.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat rekap...</p></div>';
+    const viewContainer = document.getElementById(`rekap-semester-view-container-${semester}`);
+    if (!viewContainer) return;
+    
+    viewContainer.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Memuat rekap...</p></div>';
     
     try {
         const currentYear = new Date().getFullYear();
         
-        // Langkah 1: Ambil semua siswa yang relevan (tidak berubah)
+        // Langkah 1 & 2: Pengambilan data siswa dan penanganan cache (tidak ada perubahan)
         let siswaQuery = db.collection('siswa').where('status', '==', 'Aktif');
         if (currentUser.role === 'walikelas') {
             siswaQuery = siswaQuery.where('kelas', '==', currentUser.kelasDiampu);
@@ -1958,19 +2093,16 @@ async function fetchRekap(semester) {
         const siswaSnapshot = await siswaQuery.get();
 
         if (siswaSnapshot.empty) {
-            rekapContentDiv.innerHTML = '<div class="alert alert-info">Tidak ada siswa aktif untuk ditampilkan.</div>';
+            viewContainer.innerHTML = '<div class="alert alert-info mt-3">Tidak ada siswa aktif untuk ditampilkan.</div>';
             return;
         }
 
         const allRelevantSiswa = siswaSnapshot.docs.map(doc => doc.data());
         const expectedCacheIds = allRelevantSiswa.map(s => `${s.nisn}_${currentYear}_${semester}`);
-
-        // Langkah 2: Periksa dan buat cache yang belum ada
-        const cacheBatch = db.batch();
-        let cacheNeedsUpdate = false;
         
         if (expectedCacheIds.length > 0) {
-            // *** LOGIKA BARU DENGAN CHUNKING UNTUK MENGHINDARI ERROR 'in' ***
+            const cacheBatch = db.batch();
+            let cacheNeedsUpdate = false;
             const existingCacheDocs = [];
             const promises = [];
             for (let i = 0; i < expectedCacheIds.length; i += 10) {
@@ -1982,109 +2114,109 @@ async function fetchRekap(semester) {
                 );
             }
             const snapshotResults = await Promise.all(promises);
-            snapshotResults.forEach(snapshot => {
-                snapshot.docs.forEach(doc => existingCacheDocs.push(doc));
-            });
-            // *** AKHIR LOGIKA BARU ***
-            
+            snapshotResults.forEach(snapshot => snapshot.docs.forEach(doc => existingCacheDocs.push(doc)));
             const existingCacheIds = new Set(existingCacheDocs.map(doc => doc.id));
-
-            // Cari siswa yang belum punya cache (logika ini tidak berubah)
             allRelevantSiswa.forEach(siswa => {
                 const cacheId = `${siswa.nisn}_${currentYear}_${semester}`;
                 if (!existingCacheIds.has(cacheId)) {
-                    console.log(`Membuat cache awal untuk ${siswa.nama} (NISN: ${siswa.nisn})`);
                     const cacheRef = db.collection('cache_rekap_semester').doc(cacheId);
-                    const baseData = {
+                    cacheBatch.set(cacheRef, {
                         nisn: siswa.nisn, nama: siswa.nama, kelas: siswa.kelas,
                         nomorAbsen: siswa.nomorAbsen || 0, tahun: currentYear, semester: semester,
-                        totalSakit: 0, totalIzin: 0, totalAlpha: 0,
-                        detailAbsensi: []
-                    };
-                    cacheBatch.set(cacheRef, baseData);
+                        totalSakit: 0, totalIzin: 0, totalAlpha: 0, detailAbsensi: []
+                    });
                     cacheNeedsUpdate = true;
                 }
             });
+            if (cacheNeedsUpdate) await cacheBatch.commit();
         }
 
-        if (cacheNeedsUpdate) {
-            await cacheBatch.commit();
-            console.log("Proses inisialisasi cache selesai.");
-        }
-
-        // Langkah 3: Ambil ulang data dari cache (tidak berubah)
-        rekapContentDiv.innerHTML = '<div class="text-center mt-4"><div class="spinner-border"></div><p>Menyusun data rekap...</p></div>';
-        
+        // Langkah 3: Ambil ulang data dari cache (tidak ada perubahan)
         let rekapQuery = db.collection('cache_rekap_semester')
             .where('tahun', '==', currentYear)
             .where('semester', '==', semester);
-
         if (currentUser.role === 'walikelas') {
             rekapQuery = rekapQuery.where('kelas', '==', currentUser.kelasDiampu);
         }
-
         const rekapSnapshot = await rekapQuery.get();
-
-        if (rekapSnapshot.empty) {
-            rekapContentDiv.innerHTML = '<div class="alert alert-info">Data rekap tidak ditemukan setelah inisialisasi.</div>';
-            return;
-        }
-        
-        // Langkah 4: Render data (tidak berubah)
         const rekapSiswaByClass = {};
         rekapSnapshot.forEach(doc => {
             const rekapData = doc.data();
-            if (!rekapSiswaByClass[rekapData.kelas]) {
-                rekapSiswaByClass[rekapData.kelas] = [];
-            }
+            if (!rekapSiswaByClass[rekapData.kelas]) rekapSiswaByClass[rekapData.kelas] = [];
             rekapSiswaByClass[rekapData.kelas].push({
                 nisn: rekapData.nisn, nama: rekapData.nama, nomorAbsen: rekapData.nomorAbsen,
                 kelas: rekapData.kelas,
-                total: {
-                    sakit: rekapData.totalSakit || 0,
-                    izin: rekapData.totalIzin || 0,
-                    alpha: rekapData.totalAlpha || 0
-                },
+                total: { sakit: rekapData.totalSakit || 0, izin: rekapData.totalIzin || 0, alpha: rekapData.totalAlpha || 0 },
                 detailUntukEdit: rekapData.detailAbsensi || []
             });
         });
 
-        fullRekapData = rekapSiswaByClass;
-        renderRekapTableContent();
+        fullRekapData = { ...fullRekapData, ...rekapSiswaByClass };
+        
+        // Langkah 4: Render UI yang sudah direvisi (tanpa card tambahan)
+        const kelasKeys = Object.keys(rekapSiswaByClass).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
+        let classSelectorHtml = '';
+
+        if (currentUser.role !== 'walikelas' && kelasKeys.length > 0) {
+            classSelectorHtml = `
+                <h6 class="text-muted text-center mb-2">Pilih Kelas</h6>
+                <div id="rekap-class-selector-${semester}" class="text-center mb-4">
+                    ${kelasKeys.map(k => `<button class="btn btn-outline-primary m-1 class-btn" data-kelas="${k}" data-semester="${semester}">${k}</button>`).join('')}
+                </div>
+                <hr>
+            `;
+        }
+        
+        // *** PERUBAHAN UTAMA DI SINI: <div class="card"> telah dihapus ***
+        viewContainer.innerHTML = `
+            ${classSelectorHtml}
+            <div id="rekap-semester-table-container-${semester}" class="mt-3">
+                ${currentUser.role === 'walikelas' ? '' : '<p class="text-muted text-center">Silakan pilih kelas untuk melihat rekap.</p>'}
+            </div>
+        `;
+        
+        if (currentUser.role === 'walikelas') {
+            const tableContainer = document.getElementById(`rekap-semester-table-container-${semester}`);
+            const siswaData = rekapSiswaByClass[currentUser.kelasDiampu] || [];
+            // Fungsi renderTable() sudah membuat card-nya sendiri, jadi tidak perlu pembungkus tambahan
+            tableContainer.innerHTML = renderTable(siswaData, `Rekap Kelas ${currentUser.kelasDiampu} - Semester ${semester}`);
+        }
+        
+        addRekapSemesterClassSelectorListeners(semester);
 
     } catch (error) {
         console.error("Error fetching semester recap:", error);
-        rekapContentDiv.innerHTML = `<div class="alert alert-danger">Gagal memuat rekap: ${error.message}</div>`;
+        viewContainer.innerHTML = `<div class="alert alert-danger mt-3">Gagal memuat rekap: ${error.message}</div>`;
     }
 }
 
-// Fungsi baru untuk merender konten rekap semester (tabel atau accordion kelas)
-function renderRekapTableContent() {
-    const activeTab = document.querySelector('#semesterPills .nav-link.active');
-    const semesterNumber = activeTab ? (activeTab.id === 'semester1-tab' ? 1 : 2) : 1;
-    const rekapContentDiv = document.getElementById('rekap-content-semester' + semesterNumber);
-    if (!rekapContentDiv) return;
-    let html = '';
-    if (currentUser.role === 'walikelas') {
-        html += renderTable(fullRekapData[currentUser.kelasDiampu] || [], `Rekap Kelas: ${currentUser.kelasDiampu}`);
-    } else {
-        html += `<div class="card card-body mt-3"><h5 class="card-title mb-3"><i class="fas fa-chalkboard-teacher"></i> Rekap Absensi Per Kelas</h5><div class="accordion" id="rekapClassAccordion">`;
-        const kelasKeys = Object.keys(fullRekapData).sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
-        if (kelasKeys.length === 0) html += '<div class="alert alert-info">Tidak ada data siswa untuk semester ini.</div>';
-        else {
-            kelasKeys.forEach(kelas => {
-                const classId = kelas.replace(/\s+/g, '');
-                html += `<div class="card class-accordion-item"><div class="card-header" id="hRekap${classId}"><h2 class="mb-0">
-                    <button class="btn btn-block text-left d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#cRekap${classId}">
-                    Kelas ${kelas}<i class="fas fa-chevron-down accordion-icon"></i></button></h2></div>
-                    <div id="cRekap${classId}" class="collapse" data-parent="#rekapClassAccordion"><div class="card-body">
-                    ${renderTable(fullRekapData[kelas], `Rekap Kelas: ${kelas}`)}</div></div></div>`;
+// TAMBAHKAN FUNGSI BARU INI
+function addRekapSemesterClassSelectorListeners(semester) {
+    const selectorContainer = document.getElementById(`rekap-class-selector-${semester}`);
+    if (!selectorContainer) return; // Keluar jika pemilih tidak ada (misal untuk walikelas)
+
+    selectorContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('class-btn')) {
+            const selectedKelas = e.target.dataset.kelas;
+            const sem = e.target.dataset.semester;
+
+            // Perbarui UI tombol aktif
+            selectorContainer.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.remove('btn-primary', 'font-weight-bold');
+                btn.classList.add('btn-outline-primary');
             });
+            e.target.classList.remove('btn-outline-primary');
+            e.target.classList.add('btn-primary', 'font-weight-bold');
+            
+            // Render tabel untuk kelas yang dipilih
+            const tableContainer = document.getElementById(`rekap-semester-table-container-${sem}`);
+            const siswaData = fullRekapData[selectedKelas] || [];
+            tableContainer.innerHTML = renderTable(siswaData, `Rekap Kelas ${selectedKelas} - Semester ${sem}`);
         }
-        html += `</div></div>`;
-    }
-    rekapContentDiv.innerHTML = html;
+    });
 }
+
+
 
 function renderTable(dataSiswa, title) {
     if (!dataSiswa || dataSiswa.length === 0) return '<div class="alert alert-info">Tidak ada data siswa aktif di kelas ini.</div>';
