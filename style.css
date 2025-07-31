@@ -793,3 +793,8 @@ body {
 #sidebar.active + #content .toggle-button-fixed {
     left: 265px;
 }
+
+    #sidebar ul.components {
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+    }
