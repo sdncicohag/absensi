@@ -438,21 +438,75 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (e) { return `<div class="card card-body"><p class="text-danger">Gagal memuat link unduhan.</p></div>`; }
     }
 
-    async function getInfoJadwalHtml() {
-        try {
-            const docRef = db.collection('info_kelas').doc(currentSiswa.kelas);
-            const docSnap = await docRef.get();
-            if (!docSnap.exists) return `<div class="card card-body"><p class="text-muted">Info & Jadwal belum diatur oleh wali kelas.</p></div>`;
-            const data = docSnap.data();
-            const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-            const createAccordionContent = (categoryData) => {
-                if (!categoryData) return '<li class="list-group-item text-muted">Belum ada data.</li>';
-                return hari.map(day => `<li class="list-group-item d-flex justify-content-between"><strong>${day}</strong> <span>${categoryData[day] || '-'}</span></li>`).join('');
-            };
-            const accordionHtml = `<div class="accordion" id="infoJadwalAccordion"><div class="card"><div class="card-header p-0"><h2 class="mb-0"><button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between" type="button" data-toggle="collapse" data-target="#collapsePelajaran"><i class="fas fa-book-open mr-2 text-primary"></i> Jadwal Pelajaran <i class="fas fa-chevron-down"></i></button></h2></div><div id="collapsePelajaran" class="collapse show" data-parent="#infoJadwalAccordion"><ul class="list-group list-group-flush">${createAccordionContent(data.pelajaran)}</ul></div></div><div class="card"><div class="card-header p-0"><h2 class="mb-0"><button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsePiket"><i class="fas fa-broom mr-2 text-info"></i> Jadwal Piket <i class="fas fa-chevron-down"></i></button></h2></div><div id="collapsePiket" class="collapse" data-parent="#infoJadwalAccordion"><ul class="list-group list-group-flush">${createAccordionContent(data.piket)}</ul></div></div><div class="card"><div class="card-header p-0"><h2 class="mb-0"><button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapseSeragam"><i class="fas fa-tshirt mr-2 text-success"></i> Jadwal Seragam <i class="fas fa-chevron-down"></i></button></h2></div><div id="collapseSeragam" class="collapse" data-parent="#infoJadwalAccordion"><ul class="list-group list-group-flush">${createAccordionContent(data.seragam)}</ul></div></div></div>`;
-            return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Info & Jadwal Kelas</h4>${accordionHtml}</div></div>`;
-        } catch (e) { return `<div class="card card-body"><p class="text-danger">Gagal memuat jadwal.</p></div>`; }
+    // GANTI KESELURUHAN FUNGSI INI
+async function getInfoJadwalHtml() {
+    try {
+        const docRef = db.collection('info_kelas').doc(currentSiswa.kelas);
+        const docSnap = await docRef.get();
+        if (!docSnap.exists) { 
+            return `<div class="card card-body"><p class="text-muted">Info & Jadwal belum diatur oleh wali kelas.</p></div>`; 
+        }
+
+        const data = docSnap.data();
+        const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+
+        const createAccordionContent = (categoryData) => {
+            if (!categoryData) return '<li class="list-group-item text-muted">Belum ada data.</li>';
+            
+            // --- AWAL PERUBAHAN: Mengubah struktur <li> ---
+            return hari.map(day => {
+                const jadwal = categoryData[day] || '-';
+                return `
+                    <li class="list-group-item">
+                        <strong class="d-block text-primary">${day}</strong>
+                        <span>${jadwal}</span>
+                    </li>
+                `;
+            }).join('');
+            // --- AKHIR PERUBAHAN ---
+        };
+
+        const accordionHtml = `
+            <div class="accordion" id="infoJadwalAccordion">
+                <div class="card">
+                    <div class="card-header p-0"><h2 class="mb-0">
+                        <button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between" type="button" data-toggle="collapse" data-target="#collapsePelajaran">
+                            <i class="fas fa-book-open mr-2 text-primary"></i> Jadwal Pelajaran <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </h2></div>
+                    <div id="collapsePelajaran" class="collapse show" data-parent="#infoJadwalAccordion">
+                        <ul class="list-group list-group-flush">${createAccordionContent(data.pelajaran)}</ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header p-0"><h2 class="mb-0">
+                        <button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsePiket">
+                            <i class="fas fa-broom mr-2 text-info"></i> Jadwal Piket <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </h2></div>
+                    <div id="collapsePiket" class="collapse" data-parent="#infoJadwalAccordion">
+                        <ul class="list-group list-group-flush">${createAccordionContent(data.piket)}</ul>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header p-0"><h2 class="mb-0">
+                        <button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapseSeragam">
+                             <i class="fas fa-tshirt mr-2 text-success"></i> Jadwal Seragam <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </h2></div>
+                    <div id="collapseSeragam" class="collapse" data-parent="#infoJadwalAccordion">
+                        <ul class="list-group list-group-flush">${createAccordionContent(data.seragam)}</ul>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Info & Jadwal Kelas</h4>${accordionHtml}</div></div>`;
+    } catch (e) { 
+        return `<div class="card card-body"><p class="text-danger">Gagal memuat jadwal.</p></div>`; 
     }
+}
+
 });
 
 </script>
