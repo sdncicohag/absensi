@@ -8,160 +8,104 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    
     <style>
-        body {
-            background-color: #f4f7f9; /* Sedikit abu-abu untuk latar */
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+        .wrapper { display: flex; width: 100%; align-items: stretch; }
+        #sidebar {
+            min-width: 250px; max-width: 250px; background: #fff; color: #333;
+            transition: all 0.3s; box-shadow: 0 0 15px rgba(0,0,0,0.1); z-index: 1031;
         }
-        .main-container {
-            transition: all 0.3s ease-in-out;
+        #sidebar.active { margin-left: -250px; }
+        #sidebar .sidebar-header { padding: 20px; background: #f8f9fa; }
+        #sidebar ul.components { padding: 20px 0; border-bottom: 1px solid #f1f1f1; }
+        #sidebar ul li a {
+            padding: 10px 20px; font-size: 1.1em; display: block;
+            color: #555; text-decoration: none; font-weight: 600;
         }
-        .login-logo {
-            max-width: 100px;  /* Atur batas lebar maksimal */
-            max-height: 80px; /* Atur batas tinggi maksimal */
-            width: auto;
-            height: auto;
+        #sidebar ul li a:hover { color: #007bff; background: #e9ecef; }
+        #sidebar ul li.active > a { color: #007bff; background: #e9ecef; }
+        #content { width: 100%; padding: 20px; min-height: 100vh; transition: all 0.3s; }
+        .login-logo { max-width: 100px; max-height: 80px; width: auto; height: auto; }
+        /* Fix untuk Toggle di HP */
+        @media (max-width: 768px) {
+            #sidebar { margin-left: -250px; position: fixed; height: 100%; }
+            #sidebar.active { margin-left: 0; }
+            #content.active { margin-left: 250px; }
+            #sidebarCollapse span { display: none; }
         }
-        .input-group-text {
-            background-color: #e9ecef;
-            border-right: none;
+        /* --- TAMBAHKAN ATURAN INI UNTUK MENGONTROL TAMPILAN --- */
+        body.logged-out #portal-wrapper {
+            display: none !important;
         }
-        .input-group .form-control {
-            border-left: none;
+        body.logged-out #login-container-wrapper {
+            display: flex !important;
         }
-        .input-group .form-control:focus {
-            box-shadow: none !important;
-            border-color: #ced4da;
+
+        body.logged-in #portal-wrapper {
+            display: flex !important;
         }
-        /* Style untuk layar kecil (mobile) */
-        @media (max-width: 767.98px) {
-            .card-mobile-flat {
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-                background-color: transparent !important;
-            }
-            .card-mobile-flat .card-body {
-                padding: 0 !important;
-            }
-            
-            /* REVISI: Kode untuk memperkecil font di mobile */
-            #welcome-message-siswa {
-                font-size: 1rem; /* Ukuran asli h4 adalah 1.5rem */
-            }
+        body.logged-in #login-container-wrapper {
+            display: none !important;
         }
     </style>
 </head>
-<body>
-        <nav id="portal-navbar" class="navbar navbar-light bg-white shadow-sm sticky-top" style="display: none;">
-            <div class="container d-flex align-items-center" style="max-width: 800px;">
-                <h4 id="welcome-message-siswa" class="navbar-brand mb-0 font-weight-bolder text-primary text-truncate" style="min-width: 0;"></h4>
-                
-                <button id="logoutButtonSiswa" class="btn btn-light ml-auto" title="Logout">
-                    <i class="fas fa-sign-out-alt text-danger fa-lg"></i>
-                </button>
-            </div>
-        </nav>
+<body class="logged-out">
 
-    <div id="main-content-wrapper" class="container d-flex justify-content-center align-items-center min-vh-100">
-        
-    <div id="login-container" class="card shadow-lg border-0 rounded-xl p-4 p-md-5 mx-auto" style="max-width: 450px; width: 100%;"> 
+    <div id="login-container-wrapper" class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="card shadow-lg border-0 rounded-xl p-4 p-md-5 mx-auto" style="max-width: 450px; width: 100%;"> 
             <div class="card-body">
                 <div class="text-center mb-4">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Lambang_Kab_Sukabumi.svg/1200px-Lambang_Kab_Sukabumi.svg.png" alt="Logo Sekolah" class="login-logo mb-2">
-                    <h4 class="card-title text-primary font-weight-bolder">
-                        Login Siswa & Orang Tua
-                    </h4>
+                    <h4 class="card-title text-primary font-weight-bolder">Login Siswa & Orang Tua</h4>
                     <p class="text-muted">SD Negeri Cicohag</p>
                 </div>
-                
                 <form id="loginFormSiswa">
-                    <div class="form-group mb-3">
-                        <label for="nisn" class="font-weight-bold text-dark small">NISN</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                            </div>
-                            <input type="text" id="nisn" name="nisn" class="form-control form-control-lg" placeholder="Masukkan NISN" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group mb-4">
-                        <label for="tglLahir" class="font-weight-bold text-dark small">Password</label>
-                        <div class="input-group">
-                            <div class="input-group-prepend">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                            </div>
-                            <input type="password" id="tglLahir" name="tglLahir" class="form-control form-control-lg" placeholder="Masukkan Password" required>
-                            <div class="input-group-append">
-                                <span class="input-group-text" id="togglePassword" style="cursor: pointer;">
-                                    <i class="fas fa-eye" id="toggleIcon"></i>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" id="loginButton" class="btn btn-primary btn-lg btn-block font-weight-bold mt-4">
-                        Login <i class="fas fa-sign-in-alt ml-2"></i>
-                    </button> 
+                    <div class="form-group mb-3"><label for="nisn" class="font-weight-bold text-dark small">NISN</label><input type="text" id="nisn" class="form-control form-control-lg" placeholder="Masukkan NISN" required></div>
+                    <div class="form-group mb-4"><label for="tglLahir" class="font-weight-bold text-dark small">Password (DDMMYYYY)</label><input type="password" id="tglLahir" class="form-control form-control-lg" placeholder="Masukkan Password" required></div>
+                    <button type="submit" id="loginButton" class="btn btn-primary btn-lg btn-block font-weight-bold mt-4">Login</button> 
                     <div id="login-error" class="alert alert-danger mt-3 text-center" style="display:none;"></div>
                 </form>
-
-                <div class="text-center mt-4">
-                    <a href="index.html" class="text-muted small">
-                        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Halaman Utama
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-
-        <div id="rekap-container" style="display:none; max-width: 800px; width: 100%; padding-top: 1.5rem; padding-bottom: 1.5rem;"> 
-            <div class="text-center mb-4">
-                <button id="showJadwalBtn" class="btn btn-info rounded-pill shadow-sm px-4">
-                    <i class="fas fa-clipboard-list mr-2"></i>Lihat Info & Jadwal Kelas
-                </button>
-            </div>
-
-            <div class="text-center mb-4">
-                <div class="btn-group" role="group" aria-label="Pilih Semester">
-                    <button type="button" class="btn btn-primary semester-btn" onclick="fetchRekapSiswa(1)">Semester 1</button>
-                    <button type="button" class="btn btn-outline-primary semester-btn" onclick="fetchRekapSiswa(2)">Semester 2</button>
-                </div>
-            </div>
-            
-            <div id="content-container" class="mt-3"></div>
-        </div>
-            
-            <div id="content-container" class="mt-3"></div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="jadwalModal" tabindex="-1" role="dialog" aria-labelledby="jadwalModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="jadwalModalLabel"><i class="fas fa-clipboard-list mr-2"></i> Info & Jadwal Kelas</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="jadwalModalBody">
-                    </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                </div>
             </div>
         </div>
     </div>
-    
+
+    <div class="wrapper" id="portal-wrapper" style="display: none;">
+        <nav id="sidebar">
+            <div class="sidebar-header text-center"><h5 class="font-weight-bolder">Portal Siswa</h5><p class="text-muted small mb-0">SD Negeri Cicohag</p></div>
+            <ul class="list-unstyled components">
+                <li class="active" id="nav-dasbor"><a href="#"><i class="fas fa-home mr-2"></i>Dasbor</a></li>
+                <li id="nav-tabungan"><a href="#"><i class="fas fa-piggy-bank mr-2"></i>Tabungan</a></li>
+                <li id="nav-unduh"><a href="#"><i class="fas fa-download mr-2"></i>Unduh Rapor</a></li>
+                <li id="nav-jadwal"><a href="#"><i class="fas fa-clipboard-list mr-2"></i>Info & Jadwal</a></li>
+            </ul>
+        </nav>
+
+        <div id="content">
+            <nav class="navbar navbar-expand-lg navbar-light bg-white rounded shadow-sm mb-4">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info"><i class="fas fa-align-left"></i><span> Toggle Menu</span></button>
+                    <h5 id="welcome-message-siswa" class="navbar-brand mb-0 ml-3 font-weight-bolder text-primary text-truncate"></h5>
+                    <button id="logoutButtonSiswa" class="btn btn-light ml-auto" title="Logout"><i class="fas fa-sign-out-alt text-danger fa-lg"></i></button>
+                </div>
+            </nav>
+            <div id="main-content-area"></div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rincianAbsenModal" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Rincian Ketidakhadiran</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div><div class="modal-body" id="rincianAbsenModalBody"></div></div></div></div>
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
 <script>
-    // --- GANTI DENGAN KONFIGURASI FIREBASE ANDA ---
+document.addEventListener('DOMContentLoaded', function() {
     const firebaseConfig = {
         apiKey: "AIzaSyD4nAPhGV-USPyElTyHwiDZO0ZvUGRoK5E",
         authDomain: "sistem-absensi-sdn-cicohag.firebaseapp.com",
@@ -172,36 +116,31 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const fiturConfig = {
+        tampilkanTabungan: false,     // Ubah menjadi true untuk menampilkan
+        tampilkanTrenNilai: false,  // Ubah menjadi true untuk menampilkan
+        tampilkanUnduhRapor: false,    // Ubah menjadi true untuk menampilkan
+        tampilkanPenarikanTabungan: false
+    };
+    if (!fiturConfig.tampilkanTabungan) {
+        document.getElementById('nav-tabungan').style.display = 'none';
+    }
+    if (!fiturConfig.tampilkanUnduhRapor) {
+        document.getElementById('nav-unduh').style.display = 'none';
+    }
+    
 
     let currentSiswa = null;
+    let nilaiChartInstance = null;
+    const mainContentArea = document.getElementById('main-content-area');
     
-    // REVISI: Pemilihan elemen-elemen baru
-    const mainContentWrapper = document.getElementById('main-content-wrapper');
-    const portalNavbar = document.getElementById('portal-navbar');
-    const loginContainer = document.getElementById('login-container');
-    const rekapContainer = document.getElementById('rekap-container');
-    const welcomeMessage = document.getElementById('welcome-message-siswa');
-    const contentContainer = document.getElementById('content-container');
-    // Logika untuk fitur Lihat/Sembunyikan Password
-    const togglePassword = document.getElementById('togglePassword');
-    const passwordInput = document.getElementById('tglLahir');
-    const toggleIcon = document.getElementById('toggleIcon');
-
-    togglePassword.addEventListener('click', function () {
-        // Cek tipe input
-        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordInput.setAttribute('type', type);
-        
-        // Ganti ikon mata
-        toggleIcon.classList.toggle('fa-eye-slash');
-    });
-
+    // GANTI FUNGSI INI
     document.getElementById('loginFormSiswa').addEventListener('submit', async function(e) {
         e.preventDefault();
         const loginButton = document.getElementById('loginButton');
         const loginError = document.getElementById('login-error');
         loginButton.disabled = true;
-        loginButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Mengecek...';
+        loginButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
         loginError.style.display = 'none';
 
         const nisn = document.getElementById('nisn').value;
@@ -209,240 +148,298 @@
 
         try {
             const snapshot = await db.collection('siswa').where('nisn', '==', nisn).where('tglLahir', '==', tglLahir).where('status', '==', 'Aktif').get();
-            if (snapshot.empty) throw new Error("NISN atau Password salah, atau siswa tidak aktif.");
-            
-            const siswaData = snapshot.docs[0].data();
-            currentSiswa = { nisn: nisn, tglLahir: tglLahir, nama: siswaData.nama, kelas: siswaData.kelas };
-            
-            // REVISI: Logika untuk menampilkan navbar & konten rekap
-            loginContainer.style.display = 'none';
-            portalNavbar.style.display = 'flex'; // Tampilkan navbar
-            rekapContainer.style.display = 'block'; // Tampilkan konten rekap
-            mainContentWrapper.classList.remove('align-items-center', 'min-vh-100'); // Hapus centering vertikal
+            if (snapshot.empty) throw new Error("NISN atau Password salah.");
 
-            welcomeMessage.innerHTML = `Selamat Datang, <strong>${currentSiswa.nama}</strong>!`;
-            await fetchRekapSiswa(1); 
+            currentSiswa = snapshot.docs[0].data();
+            currentSiswa.nisn = nisn;
+
+            // --- PERUBAHAN UTAMA ADA DI SINI ---
+            // Kita tidak lagi menggunakan .style.display, tapi mengubah kelas body
+            document.body.classList.remove('logged-out');
+            document.body.classList.add('logged-in');
+
+            document.getElementById('welcome-message-siswa').innerHTML = `<strong>${currentSiswa.nama}</strong>`;
+            showDashboardView();
 
         } catch (error) {
             loginError.textContent = error.message;
             loginError.style.display = 'block';
         } finally {
             loginButton.disabled = false;
-            loginButton.innerHTML = 'Login <i class="fas fa-sign-in-alt ml-2"></i>';
+            loginButton.innerHTML = 'Login';
         }
     });
     
+    // GANTI FUNGSI INI
     document.getElementById('logoutButtonSiswa').addEventListener('click', () => {
-        currentSiswa = null;
-        
-        // REVISI: Logika untuk menyembunyikan navbar & konten rekap, lalu menampilkan login
-        portalNavbar.style.display = 'none';
-        rekapContainer.style.display = 'none';
-        loginContainer.style.display = 'block';
-        mainContentWrapper.classList.add('align-items-center', 'min-vh-100'); // Kembalikan centering vertikal
-
-        contentContainer.innerHTML = '';
-        document.getElementById('jadwalModalBody').innerHTML = '';
-        document.getElementById('loginFormSiswa').reset();
+        window.location.reload();
     });
 
-    document.getElementById('showJadwalBtn').addEventListener('click', fetchInfoJadwal);
+    // --- LOGIKA SIDEBAR TOGGLE (FIXED) ---
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+        $('#content').toggleClass('active');
+    });
 
-    async function fetchRekapSiswa(semester) {
-        contentContainer.innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p class="text-muted">Memuat rekap semester...</p></div>';
+    // --- FUNGSI NAVIGASI & RENDER ---
+    function setActiveNav(navId) {
+        document.querySelectorAll('#sidebar li').forEach(li => li.classList.remove('active'));
+        document.getElementById(navId).classList.add('active');
+    }
+
+    document.getElementById('nav-dasbor').addEventListener('click', (e) => { e.preventDefault(); showDashboardView(); });
+    document.getElementById('nav-tabungan').addEventListener('click', (e) => { e.preventDefault(); showTabunganView(); });
+    document.getElementById('nav-unduh').addEventListener('click', (e) => { e.preventDefault(); showUnduhRaporView(); });
+    document.getElementById('nav-jadwal').addEventListener('click', (e) => { e.preventDefault(); showInfoJadwalView(); });
+
+    // GANTI FUNGSI INI DENGAN VERSI BARU
+    async function showDashboardView() {
+        setActiveNav('nav-dasbor');
+
+        // Tentukan lebar kolom dan konten berdasarkan konfigurasi
+        const absensiColClass = fiturConfig.tampilkanTrenNilai ? 'col-lg-5' : 'col-lg-12';
+        const nilaiCardHtml = fiturConfig.tampilkanTrenNilai 
+            ? `<div class="col-lg-7 mb-4" id="nilai-card-wrapper"></div>` 
+            : '';
+
+        // Terapkan ke halaman
+        mainContentArea.innerHTML = `
+            <div class="row">
+                <div class="${absensiColClass} mb-4" id="absensi-card-wrapper"></div>
+                ${nilaiCardHtml}
+            </div>`;
         
-        document.querySelectorAll('.semester-btn').forEach((btn, index) => {
-            btn.classList.toggle('btn-primary', index + 1 === semester);
-            btn.classList.toggle('btn-outline-primary', index + 1 !== semester);
-        });
+        // Muat konten
+        loadAndReplaceAbsensiCard(1);
+        if (fiturConfig.tampilkanTrenNilai) {
+            loadAndReplaceNilaiCard();
+        }
+    }
 
+    async function showTabunganView() {
+        setActiveNav('nav-tabungan');
+        mainContentArea.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+        mainContentArea.innerHTML = await getTabunganHtml();
+    }
+
+    async function showUnduhRaporView() {
+        setActiveNav('nav-unduh');
+        mainContentArea.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+        mainContentArea.innerHTML = await getUnduhRaporHtml();
+    }
+    
+    async function showInfoJadwalView() {
+        setActiveNav('nav-jadwal');
+        mainContentArea.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+        mainContentArea.innerHTML = await getInfoJadwalHtml();
+    }
+    
+    // GANTI FUNGSI INI
+    async function loadAndReplaceAbsensiCard(semester) {
+        const wrapper = document.getElementById('absensi-card-wrapper');
+        if (!wrapper) return;
+        
+        wrapper.innerHTML = `<div class="card shadow-sm h-100"><div class="card-body text-center d-flex align-items-center justify-content-center"><div class="spinner-border spinner-border-sm"></div></div></div>`;
+        
+        // Tampilkan HTML baru
+        wrapper.innerHTML = await getAbsensiHtml(semester);
+
+        // --- PERUBAHAN UTAMA: Tambahkan event listener setelah tombol dibuat ---
+        wrapper.querySelectorAll('.semester-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const selectedSemester = this.dataset.semester;
+                loadAndReplaceAbsensiCard(parseInt(selectedSemester));
+            });
+        });
+    }
+
+    async function loadAndReplaceNilaiCard() {
+        const wrapper = document.getElementById('nilai-card-wrapper');
+        if (!wrapper) return;
+        wrapper.innerHTML = `<div class="card shadow-sm h-100"><div class="card-body text-center d-flex align-items-center justify-content-center"><div class="spinner-border spinner-border-sm"></div></div></div>`;
+        wrapper.innerHTML = await getNilaiHtml();
+        renderNilaiChart();
+    }
+
+    // GANTI FUNGSI INI
+    async function getAbsensiHtml(semester) {
         const currentYear = new Date().getFullYear();
         const cacheDocId = `${currentSiswa.nisn}_${currentYear}_${semester}`;
         const cacheRef = db.collection('cache_rekap_semester').doc(cacheDocId);
-
+        
         try {
             const docSnap = await cacheRef.get();
-            let rekapData;
-
-            if (docSnap.exists) {
-                const dataFromCache = docSnap.data();
-                rekapData = {
-                    nama: dataFromCache.nama,
-                    kelas: dataFromCache.kelas,
-                    total: {
-                        sakit: dataFromCache.totalSakit || 0,
-                        izin: dataFromCache.totalIzin || 0,
-                        alpha: dataFromCache.totalAlpha || 0
-                    },
-                    detail: dataFromCache.detailAbsensi || []
-                };
+            let data = docSnap.exists ? docSnap.data() : { totalSakit: 0, totalIzin: 0, totalAlpha: 0, detailAbsensi: [] };
+            
+            const detailAbsensi = data.detailAbsensi || [];
+            if (detailAbsensi.length > 0) {
+                detailAbsensi.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                let rincianHtml = detailAbsensi.map(d => {
+                    const badgeClass = d.status === 'Sakit' ? 'badge-warning' : (d.status === 'Izin' ? 'badge-info' : 'badge-danger');
+                    const formattedDate = new Date(d.tanggal).toLocaleDateString('id-ID', {weekday: 'long', day: 'numeric', month: 'long'});
+                    return `<li class="list-group-item d-flex justify-content-between align-items-center">${formattedDate}<span class="badge ${badgeClass}">${d.status}</span></li>`;
+                }).join('');
+                document.getElementById('rincianAbsenModalBody').innerHTML = `<ul class="list-group list-group-flush">${rincianHtml}</ul>`;
             } else {
-                rekapData = {
-                    nama: currentSiswa.nama,
-                    kelas: currentSiswa.kelas,
-                    total: { sakit: 0, izin: 0, alpha: 0 },
-                    detail: []
-                };
+                document.getElementById('rincianAbsenModalBody').innerHTML = `<p class="text-muted text-center">Tidak ada rincian.</p>`;
             }
-            renderRekapSiswa(rekapData, semester);
-        } catch (error) {
-            contentContainer.innerHTML = `<div class="alert alert-danger mt-4"><i class="fas fa-exclamation-circle mr-2"></i> Gagal memuat rekap semester. ${error.message}</div>`;
-            console.error("Error fetching rekap siswa:", error);
+            
+            const totalAbsen = (data.totalSakit || 0) + (data.totalIzin || 0) + (data.totalAlpha || 0);
+
+            return `
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="card-title font-weight-bold text-primary mb-0"><i class="fas fa-calendar-check mr-2"></i>Rekap Absensi</h5>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn ${semester === 1 ? 'btn-primary' : 'btn-outline-primary'} semester-btn" data-semester="1">Smt 1</button>
+                                <button class="btn ${semester === 2 ? 'btn-primary' : 'btn-outline-primary'} semester-btn" data-semester="2">Smt 2</button>
+                            </div>
+                        </div>
+                        <p class="text-muted small">${semester === 1 ? 'Juli - Des' : 'Jan - Juni'}</p>
+                        <div class="row text-center no-gutters">
+                            <div class="col-4 p-1"><div class="p-2 rounded" style="background-color: #fff8e1;"><h4 class="font-weight-bolder text-warning">${data.totalSakit || 0}</h4><p class="small text-secondary mb-0">Sakit</p></div></div>
+                            <div class="col-4 p-1"><div class="p-2 rounded" style="background-color: #e3f2fd;"><h4 class="font-weight-bolder text-info">${data.totalIzin || 0}</h4><p class="small text-secondary mb-0">Izin</p></div></div>
+                            <div class="col-4 p-1"><div class="p-2 rounded" style="background-color: #fbe9e7;"><h4 class="font-weight-bolder text-danger">${data.totalAlpha || 0}</h4><p class="small text-secondary mb-0">Alfa</p></div></div>
+                        </div>
+                        <div class="text-center mt-3">
+                            ${totalAbsen > 0 ? `<span class="text-muted small">Total ${totalAbsen} kali ketidakhadiran. </span><button class="btn btn-link btn-sm p-0" data-toggle="modal" data-target="#rincianAbsenModal">Lihat Rincian</button>` : '<span class="text-success small">Selalu hadir pada semester ini.</span>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (error) { 
+            console.error("Error Gagal Muat Absensi:", error);
+            return `<div class="card card-body"><p class="text-danger">Gagal memuat absensi.</p></div>`; 
         }
     }
 
-    async function fetchInfoJadwal() {
-        const modalBody = document.getElementById('jadwalModalBody');
-        
-        // Selalu tampilkan spinner dan fetch ulang agar data selalu terbaru
-        modalBody.innerHTML = '<div class="text-center mt-4"><div class="spinner-border text-primary"></div><p class="text-muted">Memuat info & jadwal...</p></div>';
-        $('#jadwalModal').modal('show');
+    async function getNilaiHtml() {
+        return `<div class="card shadow-sm h-100"><div class="card-body"><h5 class="card-title font-weight-bold text-primary"><i class="fas fa-chart-line mr-2"></i>Tren Nilai Rapor</h5><div style="height: 300px;"><canvas id="nilaiChart"></canvas></div></div></div>`;
+    }
 
+    async function renderNilaiChart() {
+        try {
+            const nilaiSnapshot = await db.collection('siswa').doc(currentSiswa.nisn).collection('nilai_rapor').orderBy('tahunAjaran').orderBy('semester').get();
+            if (nilaiSnapshot.empty) { 
+                const canvas = document.getElementById('nilaiChart');
+                if(canvas) { const ctx = canvas.getContext('2d'); ctx.font = "16px Inter"; ctx.fillStyle = "#6c757d"; ctx.textAlign = "center"; ctx.fillText("Belum ada data nilai rapor.", canvas.width/2, canvas.height/2); }
+                return; 
+            }
+            const grades = nilaiSnapshot.docs.map(doc => doc.data());
+            const labels = grades.map(g => `Kls ${g.kelas}-Smt ${g.semester}`);
+            const dataSiswa = grades.map(g => g.nilaiRataRata);
+            if (nilaiChartInstance) nilaiChartInstance.destroy();
+            const ctx = document.getElementById('nilaiChart').getContext('2d');
+            nilaiChartInstance = new Chart(ctx, {
+                type: 'line', data: { labels: labels, datasets: [{ label: 'Nilai Rata-rata', data: dataSiswa, backgroundColor: 'rgba(0, 86, 179, 0.2)', borderColor: 'rgba(0, 86, 179, 1)', borderWidth: 3, tension: 0.3, pointBackgroundColor: 'rgba(0, 86, 179, 1)', pointRadius: 5 }] },
+                plugins: [ChartDataLabels], options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: false, max: 100 } }, plugins: { legend: { display: false }, datalabels: { align: 'top', font: { weight: 'bold' } } } }
+            });
+        } catch (e) { console.error("Gagal render chart:", e); }
+    }
+    
+    // GANTI FUNGSI INI
+    async function getTabunganHtml() {
+        try {
+            const rekapSnapshot = await db.collection('tabungan_kelas')
+                .where('idKelas', '==', currentSiswa.kelas)
+                .get();
+
+            let semuaTransaksiAnak = [];
+            rekapSnapshot.forEach(doc => {
+                const riwayat = doc.data().riwayatTransaksi || [];
+                let transaksiAnak = riwayat.filter(tx => tx.nisn === currentSiswa.nisn);
+                
+                // Filter transaksi penarikan jika dinonaktifkan
+                if (!fiturConfig.tampilkanPenarikanTabungan) {
+                    transaksiAnak = transaksiAnak.filter(tx => tx.tipe === 'Setor');
+                }
+                semuaTransaksiAnak.push(...transaksiAnak);
+            });
+
+            semuaTransaksiAnak.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+
+            let saldoAkhir = semuaTransaksiAnak.reduce((acc, tx) => acc + (tx.tipe === 'Setor' ? tx.jumlah : -tx.jumlah), 0);
+            const saldoFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(saldoAkhir);
+            
+            // Buat tabel secara dinamis berdasarkan konfigurasi
+            const headerTarikHtml = fiturConfig.tampilkanPenarikanTabungan ? '<th class="text-right">Penarikan (Rp)</th>' : '';
+            const colspanValue = fiturConfig.tampilkanPenarikanTabungan ? 3 : 2;
+
+            let tableRows = semuaTransaksiAnak.map(tx => {
+                const isSetor = tx.tipe === 'Setor';
+                const kolomTarikHtml = fiturConfig.tampilkanPenarikanTabungan 
+                    ? `<td class="text-right text-danger">${!isSetor ? new Intl.NumberFormat('id-ID').format(tx.jumlah) : '-'}</td>` 
+                    : '';
+                return `
+                    <tr>
+                        <td>${new Date(tx.tanggal).toLocaleDateString('id-ID')}</td>
+                        <td class="text-right text-success">${isSetor ? new Intl.NumberFormat('id-ID').format(tx.jumlah) : '-'}</td>
+                        ${kolomTarikHtml}
+                    </tr>
+                `;
+            }).join('');
+
+            return `
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="font-weight-bolder">Riwayat Tabungan</h4>
+                        <p>Total Saldo Saat Ini: <strong>${saldoFormatted}</strong></p>
+                        <div class="table-responsive" style="max-height: 400px;">
+                            <table class="table table-sm table-striped">
+                                <thead><tr><th>Tanggal</th><th class="text-right">Setoran (Rp)</th>${headerTarikHtml}</tr></thead>
+                                <tbody>
+                                    ${tableRows.length > 0 ? tableRows : `<tr><td colspan="${colspanValue}" class="text-center">Belum ada riwayat tabungan.</td></tr>`}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        } catch (e) { 
+            console.error("Gagal memuat tabungan:", e);
+            return `<div class="card card-body"><p class="text-danger">Gagal memuat tabungan.</p></div>`; 
+        }
+    }
+
+    async function getUnduhRaporHtml() {
+        try {
+            const nilaiSnapshot = await db.collection('siswa').doc(currentSiswa.nisn).collection('nilai_rapor').orderBy('tahunAjaran', 'desc').orderBy('semester', 'desc').get();
+            if (nilaiSnapshot.empty) return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder">Unduh Rapor & Ijazah</h4><div class="alert alert-info">Belum ada rapor digital yang tersedia.</div></div></div>`;
+            let downloadHtml = '<div class="accordion" id="raporAccordion">';
+            const gradesByYear = nilaiSnapshot.docs.reduce((acc, doc) => {
+                const grade = doc.data(); const yearKey = `TA ${grade.tahunAjaran}/${grade.tahunAjaran + 1}`; if (!acc[yearKey]) acc[yearKey] = []; acc[yearKey].push(grade); return acc;
+            }, {});
+            Object.keys(gradesByYear).forEach((yearKey, index) => {
+                const grades = gradesByYear[yearKey]; const yearId = yearKey.replace(/\s|\//g, '');
+                downloadHtml += `<div class="card"><div class="card-header" id="heading${yearId}"><h2 class="mb-0"><button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapse${yearId}" aria-expanded="${index === 0}">${yearKey} - Kelas ${grades[0].kelas}</button></h2></div><div id="collapse${yearId}" class="collapse ${index === 0 ? 'show' : ''}" data-parent="#raporAccordion"><div class="list-group list-group-flush">`;
+                grades.forEach(g => {
+                    if (g.linkPDF) downloadHtml += `<a href="${g.linkPDF}" target="_blank" class="list-group-item list-group-item-action">Rapor Semester ${g.semester}</a>`;
+                    if (g.kelas === '6' && g.semester === 2 && g.linkIjazah) downloadHtml += `<a href="${g.linkIjazah}" target="_blank" class="list-group-item list-group-item-action list-group-item-success font-weight-bold">Unduh Ijazah</a>`;
+                });
+                downloadHtml += `</div></div></div>`;
+            });
+            downloadHtml += '</div>';
+            return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Unduh Rapor & Ijazah</h4>${downloadHtml}</div></div>`;
+        } catch (e) { return `<div class="card card-body"><p class="text-danger">Gagal memuat link unduhan.</p></div>`; }
+    }
+
+    async function getInfoJadwalHtml() {
         try {
             const docRef = db.collection('info_kelas').doc(currentSiswa.kelas);
             const docSnap = await docRef.get();
-            const data = docSnap.exists ? docSnap.data() : {};
-            renderInfoJadwal(data);
-        } catch (error) {
-            modalBody.innerHTML = `<div class="alert alert-danger">Gagal memuat jadwal: ${error.message}</div>`;
-        }
+            if (!docSnap.exists) return `<div class="card card-body"><p class="text-muted">Info & Jadwal belum diatur oleh wali kelas.</p></div>`;
+            const data = docSnap.data();
+            const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const createAccordionContent = (categoryData) => {
+                if (!categoryData) return '<li class="list-group-item text-muted">Belum ada data.</li>';
+                return hari.map(day => `<li class="list-group-item d-flex justify-content-between"><strong>${day}</strong> <span>${categoryData[day] || '-'}</span></li>`).join('');
+            };
+            const accordionHtml = `<div class="accordion" id="infoJadwalAccordion"><div class="card"><div class="card-header p-0"><h2 class="mb-0"><button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between" type="button" data-toggle="collapse" data-target="#collapsePelajaran"><i class="fas fa-book-open mr-2 text-primary"></i> Jadwal Pelajaran <i class="fas fa-chevron-down"></i></button></h2></div><div id="collapsePelajaran" class="collapse show" data-parent="#infoJadwalAccordion"><ul class="list-group list-group-flush">${createAccordionContent(data.pelajaran)}</ul></div></div><div class="card"><div class="card-header p-0"><h2 class="mb-0"><button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapsePiket"><i class="fas fa-broom mr-2 text-info"></i> Jadwal Piket <i class="fas fa-chevron-down"></i></button></h2></div><div id="collapsePiket" class="collapse" data-parent="#infoJadwalAccordion"><ul class="list-group list-group-flush">${createAccordionContent(data.piket)}</ul></div></div><div class="card"><div class="card-header p-0"><h2 class="mb-0"><button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between collapsed" type="button" data-toggle="collapse" data-target="#collapseSeragam"><i class="fas fa-tshirt mr-2 text-success"></i> Jadwal Seragam <i class="fas fa-chevron-down"></i></button></h2></div><div id="collapseSeragam" class="collapse" data-parent="#infoJadwalAccordion"><ul class="list-group list-group-flush">${createAccordionContent(data.seragam)}</ul></div></div></div>`;
+            return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Info & Jadwal Kelas</h4>${accordionHtml}</div></div>`;
+        } catch (e) { return `<div class="card card-body"><p class="text-danger">Gagal memuat jadwal.</p></div>`; }
     }
-
-    // GANTI KESELURUHAN FUNGSI renderInfoJadwal() DENGAN VERSI AKORDEON INI
-    function renderInfoJadwal(data) {
-        const modalBody = document.getElementById('jadwalModalBody');
-        const hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
-    
-        // Cek jika data masih kosong atau belum diisi oleh wali kelas
-        if (!data || Object.keys(data).length === 0) {
-            modalBody.innerHTML = '<p class="text-muted text-center p-4">Informasi jadwal belum ditambahkan oleh wali kelas.</p>';
-            return;
-        }
-    
-        // Fungsi bantuan untuk membuat isi dari setiap bagian akordeon
-        const createAccordionContent = (categoryData) => {
-            if (!categoryData || Object.keys(categoryData).length === 0) {
-                return '<li class="list-group-item text-muted">Belum ada data.</li>';
-            }
-            return hari.map(day => {
-                const jadwal = categoryData[day] || '-';
-                return `<li class="list-group-item d-flex justify-content-between"><strong>${day}</strong> <span>${jadwal}</span></li>`;
-            }).join('');
-        };
-    
-        // Membuat struktur Akordeon
-        modalBody.innerHTML = `
-            <div class="accordion" id="infoJadwalAccordion">
-                <div class="card">
-                    <div class="card-header p-0" id="headingPelajaran">
-                        <h2 class="mb-0">
-                            <button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between align-items-center" type="button" data-toggle="collapse" data-target="#collapsePelajaran">
-                                <i class="fas fa-book-open mr-2 text-primary"></i> Jadwal Pelajaran
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                        </h2>
-                    </div>
-                    <div id="collapsePelajaran" class="collapse show" data-parent="#infoJadwalAccordion">
-                        <ul class="list-group list-group-flush">${createAccordionContent(data.pelajaran)}</ul>
-                    </div>
-                </div>
-    
-                <div class="card">
-                    <div class="card-header p-0" id="headingPiket">
-                        <h2 class="mb-0">
-                            <button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between align-items-center collapsed" type="button" data-toggle="collapse" data-target="#collapsePiket">
-                                <i class="fas fa-broom mr-2 text-info"></i> Jadwal Piket
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                        </h2>
-                    </div>
-                    <div id="collapsePiket" class="collapse" data-parent="#infoJadwalAccordion">
-                        <ul class="list-group list-group-flush">${createAccordionContent(data.piket)}</ul>
-                    </div>
-                </div>
-    
-                <div class="card">
-                    <div class="card-header p-0" id="headingSeragam">
-                        <h2 class="mb-0">
-                            <button class="btn btn-light btn-block text-left p-3 d-flex justify-content-between align-items-center collapsed" type="button" data-toggle="collapse" data-target="#collapseSeragam">
-                                 <i class="fas fa-tshirt mr-2 text-success"></i> Jadwal Seragam
-                                <i class="fas fa-chevron-down"></i>
-                            </button>
-                        </h2>
-                    </div>
-                    <div id="collapseSeragam" class="collapse" data-parent="#infoJadwalAccordion">
-                        <ul class="list-group list-group-flush">${createAccordionContent(data.seragam)}</ul>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function getBadgeClass(status) {
-        switch (status) {
-            case 'Sakit': return 'badge-warning'; 
-            case 'Izin': return 'badge-info'; 
-            case 'Tanpa Keterangan': case 'Alfa': return 'badge-danger'; 
-            default: return 'badge-secondary'; 
-        }
-    }
-
-function renderRekapSiswa(data, semester) {
-    data.detail.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
-
-    // DESAIN KARTU BARU UNTUK STATISTIK
-    let html = `
-        <div class="card shadow-sm rounded-xl card-mobile-flat">
-            <div class="card-body">
-                <h5 class="card-title text-primary font-weight-bold"><i class="fas fa-chart-bar mr-2"></i> Rekap Semester ${semester}</h5>
-                <p class="text-muted small mb-4">Untuk Ananda ${data.nama} (Kelas ${data.kelas})</p>
-                
-                <div class="row text-center no-gutters mb-4">
-                    <div class="col-4 px-1">
-                        <div class="p-3 rounded-lg" style="background-color: #fff8e1;">
-                            <h4 class="font-weight-bolder text-warning mb-1">${data.total.sakit}</h4>
-                            <p class="small font-weight-bold text-secondary mb-0">Sakit</p>
-                        </div>
-                    </div>
-                    <div class="col-4 px-1">
-                        <div class="p-3 rounded-lg" style="background-color: #e3f2fd;">
-                             <h4 class="font-weight-bolder text-info mb-1">${data.total.izin}</h4>
-                             <p class="small font-weight-bold text-secondary mb-0">Izin</p>
-                        </div>
-                    </div>
-                    <div class="col-4 px-1">
-                        <div class="p-3 rounded-lg" style="background-color: #fbe9e7;">
-                             <h4 class="font-weight-bolder text-danger mb-1">${data.total.alpha}</h4>
-                             <p class="small font-weight-bold text-secondary mb-0">Alfa</p>
-                        </div>
-                    </div>
-                </div>
-
-                <h6 class="mt-4 text-dark font-weight-bold"><i class="fas fa-list-alt mr-2"></i> Rincian Ketidakhadiran</h6>`;
-
-    if (data.detail && data.detail.length > 0) {
-        // Menggunakan List Group, bukan Tabel
-        html += `<ul class="list-group list-group-flush mt-3">`;
-        data.detail.forEach(d => {
-            const badgeClass = getBadgeClass(d.status);
-            const formattedDate = new Date(d.tanggal).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            // Setiap item adalah list-group-item dengan flexbox
-            html += `
-                <li class="list-group-item d-flex justify-content-between align-items-center px-1">
-                    <div>
-                        <small class="text-muted">${formattedDate}</small>
-                    </div>
-                    <span class="badge ${badgeClass} p-2" style="font-size: 0.8rem;">${d.status}</span>
-                </li>`;
-        });
-        html += `</ul>`;
-    } else {
-        html += `<div class="alert alert-success mt-3 text-center"><i class="fas fa-check-circle mr-2"></i> Ananda selalu hadir pada semester ini. Luar biasa!</div>`;
-    }
-
-    html += '</div></div>';
-    contentContainer.innerHTML = html;
-}
+});
 
 </script>
 </body>
