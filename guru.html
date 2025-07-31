@@ -122,20 +122,22 @@
         <button type="button" id="sidebarCollapse" class="btn btn-info toggle-button-fixed d-block d-md-none">
             <i class="fas fa-align-left"></i>
         </button>
-
-        <nav class="navbar navbar-expand-lg navbar-light bg-light custom-navbar-top">
+        <nav class="navbar navbar-expand navbar-light bg-light custom-navbar-top">
             <div class="container-fluid">
                 <button type="button" id="sidebarCollapseDesktop" class="btn btn-info d-none d-md-block">
                     <i class="fas fa-align-left"></i>
-                    <span class="d-none d-md-inline-block"></span>
+                    <span class="d-none d-md-inline-block">Toggle Sidebar</span>
                 </button>
-                <span id="welcome-message" class="navbar-text ml-3">Selamat Datang, <strong>Guru</strong></span>
+                
+                <div class="mx-2 text-truncate" style="min-width: 0;">
+                    <span id="welcome-message" class="navbar-text">Selamat Datang, <strong>Guru</strong>!</span>
+                </div>
+
                 <button id="logoutButtonGuru" class="btn btn-light ml-auto" title="Logout">
                     <i class="fas fa-sign-out-alt text-danger fa-lg"></i>
                 </button>
             </div>
         </nav>
-
         <div class="container-fluid portal-content-area">
                 <div id="dashboard-content-area">
                     <div id="daily-summary-display"></div> 
@@ -3776,7 +3778,7 @@ async function hitungDanSimpanRataRataKelas() {
 
 // --- KUMPULAN FUNGSI BARU UNTUK MODUL KEUANGAN ---
 
-// Fungsi utama untuk menampilkan dasbor keuangan
+// GANTI FUNGSI INI DENGAN VERSI BARU
 async function showKeuanganDashboard() {
     hideAllMainContentAreas();
     mainContentArea.style.display = 'block';
@@ -3785,7 +3787,7 @@ async function showKeuanganDashboard() {
     try {
         const rekeningSnapshot = await db.collection('rekening_sekolah').get();
         let cardsHtml = '';
-
+        
         rekeningSnapshot.forEach(doc => {
             const rekening = doc.data();
             const saldoFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(rekening.saldo || 0);
@@ -3802,19 +3804,23 @@ async function showKeuanganDashboard() {
             `;
         });
 
+        // --- AWAL PERUBAHAN: Membuat tombol menjadi responsif ---
         let buttonsHtml = '';
         if (currentUser.jabatan === 'Bendahara') {
             buttonsHtml = `
                 <div class="col-12 mb-4 text-center">
                     <button class="btn btn-success" onclick="openTransaksiModal()">
-                        <i class="fas fa-plus-circle mr-2"></i>Catat Transaksi
+                        <i class="fas fa-plus-circle"></i>
+                        <span class="d-none d-sm-inline ml-2">Catat Transaksi</span>
                     </button>
                     <button class="btn btn-info" onclick="openRekeningModal()">
-                        <i class="fas fa-university mr-2"></i>Buat Rekening Baru
+                        <i class="fas fa-university"></i>
+                        <span class="d-none d-sm-inline ml-2">Buat Rekening</span>
                     </button>
                 </div>
             `;
         }
+        // --- AKHIR PERUBAHAN ---
 
         mainContentArea.innerHTML = `
             <div class="d-flex justify-content-between align-items-center mb-4">
