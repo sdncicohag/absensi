@@ -81,8 +81,10 @@
             <ul class="list-unstyled components">
                 <li class="active" id="nav-dasbor"><a href="#"><i class="fas fa-home mr-2"></i>Dasbor</a></li>
                 <li id="nav-tabungan"><a href="#"><i class="fas fa-piggy-bank mr-2"></i>Tabungan</a></li>
+                <li id="nav-ulangan"><a href="#"><i class="fas fa-marker mr-2"></i>Nilai Ulangan</a></li>
                 <li id="nav-unduh"><a href="#"><i class="fas fa-download mr-2"></i>Unduh Rapor</a></li>
-                <li id="nav-jadwal"><a href="#"><i class="fas fa-clipboard-list mr-2"></i>Info & Jadwal</a></li>
+                <li id="nav-materi"><a href="#"><i class="fas fa-book-reader mr-2"></i>Materi Belajar</a></li>
+                <li id="nav-jadwal"><a href="#"><i class="fas fa-clipboard-list mr-2"></i>Jadwal</a></li>
             </ul>
         </nav>
 
@@ -134,7 +136,9 @@ document.addEventListener('DOMContentLoaded', function() {
         tampilkanTabungan: false,     // Ubah menjadi true untuk menampilkan
         tampilkanTrenNilai: false,  // Ubah menjadi true untuk menampilkan
         tampilkanUnduhRapor: false,    // Ubah menjadi true untuk menampilkan
-        tampilkanPenarikanTabungan: false
+        tampilkanPenarikanTabungan: false,
+        tampilkanMateriBelajar: false,
+        tampilkanNilaiUlangan: false
     };
     if (!fiturConfig.tampilkanTabungan) {
         document.getElementById('nav-tabungan').style.display = 'none';
@@ -142,7 +146,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!fiturConfig.tampilkanUnduhRapor) {
         document.getElementById('nav-unduh').style.display = 'none';
     }
-    
+    if (!fiturConfig.tampilkanMateriBelajar) {
+    document.getElementById('nav-materi').style.display = 'none';
+    }
+    if (!fiturConfig.tampilkanNilaiUlangan) {
+    document.getElementById('nav-ulangan').style.display = 'none';
+    }
 
     let currentSiswa = null;
     let nilaiChartInstance = null;
@@ -205,6 +214,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('nav-tabungan').addEventListener('click', (e) => { e.preventDefault(); showTabunganView(); });
     document.getElementById('nav-unduh').addEventListener('click', (e) => { e.preventDefault(); showUnduhRaporView(); });
     document.getElementById('nav-jadwal').addEventListener('click', (e) => { e.preventDefault(); showInfoJadwalView(); });
+    document.getElementById('nav-materi').addEventListener('click', (e) => { e.preventDefault(); showMateriBelajarView(); });
+    document.getElementById('nav-ulangan').addEventListener('click', (e) => { e.preventDefault(); showNilaiUlanganView(); });
+
+
 
     // GANTI FUNGSI INI DENGAN VERSI BARU
     async function showDashboardView() {
@@ -504,6 +517,144 @@ async function getInfoJadwalHtml() {
         return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Info & Jadwal Kelas</h4>${accordionHtml}</div></div>`;
     } catch (e) { 
         return `<div class="card card-body"><p class="text-danger">Gagal memuat jadwal.</p></div>`; 
+    }
+}
+// 2. Tambahkan fungsi baru untuk menampilkan halaman
+async function showMateriBelajarView() {
+    setActiveNav('nav-materi');
+    mainContentArea.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+    mainContentArea.innerHTML = await getMateriBelajarHtml();
+}
+
+// 3. Tambahkan fungsi baru untuk mengambil dan membuat HTML
+async function getMateriBelajarHtml() {
+    try {
+        const docRef = db.collection('bank_materi_per_kelas').doc(currentSiswa.kelas);
+        const docSnap = await docRef.get();
+        if (!docSnap.exists) {
+            return `<div class="card card-body"><h4 class="font-weight-bolder">Materi Belajar</h4><p class="text-muted">Belum ada materi yang diunggah oleh wali kelas.</p></div>`;
+        }
+
+        const dataMateri = docSnap.data();
+        const daftarMapelMaster = ["Pendidikan Agama", "Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "IPAS", "PJOK", "Seni Budaya", "Bahasa Inggris", "Bahasa Sunda"];
+        const sortedMapel = daftarMapelMaster.filter(mapel => dataMateri[mapel] && dataMateri[mapel].length > 0);
+
+        let accordionHtml = '<div class="accordion" id="materiBelajarAccordion">';
+        if (sortedMapel.length === 0) {
+            accordionHtml += '<p class="text-center text-muted">Belum ada materi yang diunggah.</p>';
+        } else {
+            sortedMapel.forEach(mapel => {
+                const mapelId = mapel.replace(/\s+/g, '');
+                accordionHtml += `
+                    <div class="card">
+                        <div class="card-header p-0"><h2 class="mb-0">
+                            <button class="btn btn-light btn-block text-left p-3" type="button" data-toggle="collapse" data-target="#collapse${mapelId}">
+                                ${mapel}
+                            </button>
+                        </h2></div>
+                        <div id="collapse${mapelId}" class="collapse" data-parent="#materiBelajarAccordion">
+                            <div class="list-group list-group-flush">`;
+                
+                dataMateri[mapel].sort((a,b) => b.tanggalUnggah - a.tanggalUnggah).forEach(materi => {
+                    accordionHtml += `
+                        <a href="${materi.link}" target="_blank" class="list-group-item list-group-item-action">
+                            <strong>${materi.judul}</strong>
+                            <small class="d-block text-muted">${materi.deskripsi || ''}</small>
+                        </a>
+                    `;
+                });
+                accordionHtml += `</div></div></div>`;
+            });
+        }
+        accordionHtml += '</div>';
+        
+        return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Materi Belajar</h4>${accordionHtml}</div></div>`;
+    } catch (e) { 
+        return `<div class="card card-body"><p class="text-danger">Gagal memuat materi belajar.</p></div>`; 
+    }
+}
+
+// 2. Fungsi baru untuk menampilkan halaman
+async function showNilaiUlanganView() {
+    setActiveNav('nav-ulangan');
+    mainContentArea.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div></div>`;
+    mainContentArea.innerHTML = await getNilaiUlanganHtml();
+}
+
+// 3. Fungsi baru untuk mengambil dan membuat HTML
+async function getNilaiUlanganHtml() {
+    try {
+        const snapshot = await db.collection('ulangan')
+            .where('idKelas', '==', currentSiswa.kelas)
+            .orderBy('tanggal', 'desc')
+            .get();
+
+        if (snapshot.empty) {
+            return `<div class="card card-body"><h4 class="font-weight-bolder">Nilai Ulangan</h4><p class="text-muted">Belum ada data nilai ulangan yang diinput oleh guru.</p></div>`;
+        }
+        
+        // Kelompokkan ulangan per mata pelajaran
+        const ulanganByMapel = snapshot.docs.reduce((acc, doc) => {
+            const ulangan = doc.data();
+            ulangan.id = doc.id; // Simpan ID dokumen
+            const mapel = ulangan.mataPelajaran;
+            if (!acc[mapel]) acc[mapel] = [];
+            acc[mapel].push(ulangan);
+            return acc;
+        }, {});
+
+        const daftarMapelMaster = ["Pendidikan Agama", "Pendidikan Pancasila", "Bahasa Indonesia", "Matematika", "IPAS", "PJOK", "Seni Budaya", "Bahasa Inggris", "Bahasa Sunda"];
+        const sortedMapel = daftarMapelMaster.filter(mapel => ulanganByMapel[mapel]);
+
+        let accordionHtml = '<div class="accordion" id="ulanganAccordion">';
+        sortedMapel.forEach(mapel => {
+            const mapelId = mapel.replace(/\s+/g, '');
+            accordionHtml += `
+                <div class="card">
+                    <div class="card-header p-0"><h2 class="mb-0">
+                        <button class="btn btn-light btn-block text-left p-3" type="button" data-toggle="collapse" data-target="#collapse${mapelId}">
+                            ${mapel}
+                        </button>
+                    </h2></div>
+                    <div id="collapse${mapelId}" class="collapse" data-parent="#ulanganAccordion">
+                        <div class="list-group list-group-flush">`;
+            
+            ulanganByMapel[mapel].forEach(ulangan => {
+                const nilaiSiswa = ulangan.daftarNilai?.[currentSiswa.nisn];
+                const rekap = ulangan.rekapNilai || {};
+                
+                let badgeClass = 'badge-secondary';
+                if (nilaiSiswa !== undefined) {
+                    if (rekap.rataRataKelas && nilaiSiswa >= rekap.rataRataKelas) badgeClass = 'badge-success';
+                    else if (rekap.rataRataKelas && nilaiSiswa < rekap.rataRataKelas) badgeClass = 'badge-warning';
+                }
+
+                accordionHtml += `
+                    <div class="list-group-item">
+                        <strong>${ulangan.namaUlangan}</strong>
+                        <div class="d-flex justify-content-between align-items-center mt-2">
+                            <div>
+                                <span class="badge ${badgeClass} p-2" style="font-size: 1rem;">
+                                    Nilai: ${nilaiSiswa !== undefined ? nilaiSiswa : 'N/A'}
+                                </span>
+                            </div>
+                            <div class="text-right">
+                                <small class="d-block">Rata-rata Kelas: ${rekap.rataRataKelas || '-'}</small>
+                                <small class="d-block">Tertinggi: ${rekap.nilaiTertinggi || '-'}</small>
+                                <small class="d-block">Terendah: ${rekap.nilaiTerendah || '-'}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            accordionHtml += `</div></div></div>`;
+        });
+        accordionHtml += '</div>';
+        
+        return `<div class="card shadow-sm"><div class="card-body"><h4 class="font-weight-bolder mb-3">Nilai Ulangan</h4>${accordionHtml}</div></div>`;
+    } catch (e) { 
+        console.error("Gagal memuat nilai ulangan:", e);
+        return `<div class="card card-body"><p class="text-danger">Gagal memuat nilai ulangan.</p></div>`; 
     }
 }
 
