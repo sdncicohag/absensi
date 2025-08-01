@@ -794,7 +794,19 @@ body {
     left: 265px;
 }
 
-    #sidebar ul.components {
-        max-height: calc(100vh - 80px);
-        overflow-y: auto;
+#sidebar ul.components {
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+}
+
+    .modal {
+        z-index: 1050 !important; /* Pastikan z-index lebih tinggi dari backdrop */
+    }
+    .modal-backdrop {
+        z-index: 1040 !important;
+    }
+    /* Aturan ini memastikan modal yang seharusnya tampil benar-benar terlihat */
+    .modal.fade.show {
+        display: block !important;
+        opacity: 1 !important;
     }
