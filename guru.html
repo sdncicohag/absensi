@@ -675,17 +675,20 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
             kelasDiampu: userData.kelasDiampu || null,
             jabatan: userData.jabatan || null
         };
+        
+        // === BARIS BARU UNTUK MENYIMPAN SESI ===
+        localStorage.setItem('currentUserGuru', JSON.stringify(currentUser));
+        // === AKHIR BARIS BARU ===
+
         if (currentUser.jabatan === 'Bendahara' || currentUser.role === 'admin') {
             document.getElementById('menu-rekap-tabungan').style.display = 'block';
         }
         loginContainer.style.display = 'none';
-        mainContainer.style.display = 'flex'; // Menggunakan flex untuk sidebar layout
-        await showQuickSummary(); // Tampilkan ringkasan cepat secara default
-        console.log('Main container display set to:', mainContainer.style.display); // LOG INI PENTING
-
+        mainContainer.style.display = 'flex';
+        await showQuickSummary(); 
+        
         welcomeMessage.innerHTML = `<strong>${currentUser.name}</strong>`;
 
-            // Atur visibilitas menu
             const isWaliKelas = currentUser.role === 'walikelas';
             sidebarUnscannedLink.style.display = isWaliKelas ? 'block' : 'none';
             sidebarManualLink.style.display = isWaliKelas ? 'block' : 'none';
@@ -704,10 +707,13 @@ document.getElementById('loginForm').addEventListener('submit', async function(e
 
 // --- Logika Logout ---
 function logout() {
+    // === BARIS BARU UNTUK MENGHAPUS SESI ===
+    localStorage.removeItem('currentUserGuru');
+    // === AKHIR BARIS BARU ===
+
     currentUser = null;
     mainContainer.style.display = 'none';
     loginContainer.style.display = 'block';
-    // Pastikan semua area konten disembunyikan saat logout
     dashboardContentArea.innerHTML = ''; 
     mainContentArea.innerHTML = '';
     document.getElementById('loginForm').reset();
@@ -3600,12 +3606,25 @@ async function openInputNilaiModal() {
     // Ambil data nilai yang sudah ada (jika ada)
     const nilaiDocId = `${siswa.nisn}_${nilaiState.kelas}_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
     const nilaiRef = db.collection('siswa').doc(siswa.nisn).collection('nilai_rapor').doc(nilaiDocId);
+    // === AWAL BLOK PENGGANTI (MEMUAT DRAFT NILAI RAPOR) ===
     const nilaiDoc = await nilaiRef.get();
-    const dataNilai = nilaiDoc.exists ? nilaiDoc.data() : {};
+    const dataNilaiDariDB = nilaiDoc.exists ? nilaiDoc.data() : {};
+
+    // 1. Cek apakah ada draft di localStorage
+    const draftKey = `draft_nilai_rapor_${siswa.nisn}_${nilaiState.kelas}_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+    const draftJson = localStorage.getItem(draftKey);
+    const draftData = draftJson ? JSON.parse(draftJson) : null;
+    
+    if (draftData) {
+        Toastify({ text: "Draft nilai rapor sebelumnya berhasil dimuat.", style: { background: "blue" } }).showToast();
+    }
+
+    // 2. Prioritaskan data dari draft, jika tidak ada, baru ambil dari database
+    const dataFinal = draftData || dataNilaiDariDB;
     
     let formHtml = '';
     nilaiState.konfigurasiMapel.forEach(mapel => {
-        const nilai = dataNilai.daftarNilai ? (dataNilai.daftarNilai[mapel] || '') : '';
+        const nilai = dataFinal.daftarNilai ? (dataFinal.daftarNilai[mapel] || '') : '';
         formHtml += `
             <div class="form-group row">
                 <label class="col-sm-4 col-form-label">${mapel}</label>
@@ -3616,31 +3635,57 @@ async function openInputNilaiModal() {
         `;
     });
     
-    // --- AWAL LOGIKA BARU ---
-    // Tambahkan input link rapor, dan link ijazah jika kondisinya sesuai
     formHtml += `<hr>`;
     formHtml += `
         <div class="form-group">
             <label for="link-pdf-rapor"><strong>Link Unduh Rapor (PDF)</strong></label>
-            <input type="url" id="link-pdf-rapor" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini" value="${dataNilai.linkPDF || ''}">
+            <input type="url" id="link-pdf-rapor" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini" value="${dataFinal.linkPDF || ''}">
         </div>
     `;
 
-    // Cek apakah ini Kelas 6 dan Semester 2
     if (nilaiState.kelas === '6' && nilaiState.semester === 2) {
         formHtml += `
             <div class="form-group">
                 <label for="link-pdf-ijazah"><strong>Link Ijazah (PDF)</strong> <span class="badge badge-success">Khusus Kelas 6</span></label>
-                <input type="url" id="link-pdf-ijazah" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini" value="${dataNilai.linkIjazah || ''}">
+                <input type="url" id="link-pdf-ijazah" class="form-control" placeholder="Tempel link Google Drive atau lainnya di sini" value="${dataFinal.linkIjazah || ''}">
             </div>
         `;
     }
-    // --- AKHIR LOGIKA BARU ---
     
     // Tampilkan semua elemen form yang sudah dibuat
     formContainer.innerHTML = formHtml;
     // Hapus baris ini karena link rapor sudah dimasukkan dalam blok HTML di atas
     // linkPdfInput.value = dataNilai.linkPDF || '';
+
+    formContainer.addEventListener('input', () => {
+        const siswa = nilaiState.siswaSedangDiedit;
+        const draftKey = `draft_nilai_rapor_${siswa.nisn}_${nilaiState.kelas}_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+        const draftData = {
+            daftarNilai: {},
+            linkPDF: '',
+            linkIjazah: null
+        };
+
+        // Ambil semua nilai mata pelajaran
+        formContainer.querySelectorAll('.nilai-mapel-input').forEach(input => {
+            const mapel = input.dataset.mapel;
+            if (input.value.trim() !== '') {
+                draftData.daftarNilai[mapel] = input.value;
+            }
+        });
+
+        // Ambil nilai link rapor dan ijazah
+        const linkPdfInput = document.getElementById('link-pdf-rapor');
+        if(linkPdfInput) draftData.linkPDF = linkPdfInput.value;
+
+        const linkIjazahInput = document.getElementById('link-pdf-ijazah');
+        if (linkIjazahInput) draftData.linkIjazah = linkIjazahInput.value;
+
+        // Simpan ke localStorage
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
+        console.log('Draft nilai rapor disimpan...'); // Boleh dihapus nanti
+    });
+
 }
 
 async function saveMapelConfiguration() {
@@ -3733,6 +3778,10 @@ async function saveNilaiSiswa() {
         }
 
         await nilaiRef.set(dataToSave);
+
+        const draftKey = `draft_nilai_rapor_${siswa.nisn}_${nilaiState.kelas}_${nilaiState.semester}_${nilaiState.tahunAjaran}`;
+        localStorage.removeItem(draftKey);
+        
         
         Toastify({ text: `Nilai untuk ${siswa.nama} berhasil disimpan!`, style: { background: "green" } }).showToast();
         $('#inputNilaiModal').modal('hide');
@@ -5517,12 +5566,24 @@ async function showInputNilaiUlanganView(ulanganId) {
         if (!ulanganDoc.exists) throw new Error("Data ulangan tidak ditemukan.");
         if (!cacheDoc.exists) throw new Error("Cache daftar siswa tidak ditemukan. Silakan buka menu 'Daftar Siswa' lalu klik 'Perbarui Data'.");
         
+        // === AWAL BLOK PENGGANTI (MEMUAT DRAFT) ===
         const ulanganData = ulanganDoc.data();
         const daftarSiswa = cacheDoc.data().daftarSiswa.filter(s => s.status === 'Aktif');
 
+        // 1. Cek apakah ada draft di localStorage
+        const draftKey = `draft_nilai_${ulanganId}`;
+        const draftJson = localStorage.getItem(draftKey);
+        const draftNilai = draftJson ? JSON.parse(draftJson) : null;
+        
+        if (draftNilai) {
+             Toastify({ text: "Draft nilai sebelumnya berhasil dimuat.", style: { background: "blue" } }).showToast();
+        }
+
         let tableRows = '';
         daftarSiswa.forEach(siswa => {
-            const nilaiSiswa = ulanganData.daftarNilai?.[siswa.nisn] || '';
+            // 2. Prioritaskan nilai dari draft, jika tidak ada, baru ambil dari database
+            const nilaiSiswa = draftNilai?.[siswa.nisn] || ulanganData.daftarNilai?.[siswa.nisn] || '';
+            
             tableRows += `
                 <tr>
                     <td>${siswa.nomorAbsen}</td>
@@ -5534,6 +5595,7 @@ async function showInputNilaiUlanganView(ulanganId) {
                 </tr>
             `;
         });
+        // === AKHIR BLOK PENGGANTI ===
 
         mainContentArea.innerHTML = `
             <div class="card shadow-sm"><div class="card-body">
@@ -5556,6 +5618,20 @@ async function showInputNilaiUlanganView(ulanganId) {
         
         document.getElementById('save-semua-nilai-btn').addEventListener('click', () => saveSemuaNilaiUlangan(ulanganId));
 
+        mainContentArea.addEventListener('input', (e) => {
+            if (e.target.classList.contains('nilai-ulangan-input')) {
+                const draftKey = `draft_nilai_${ulanganId}`;
+                const draftNilai = {};
+                document.querySelectorAll('.nilai-ulangan-input').forEach(input => {
+                    const nisn = input.dataset.nisn;
+                    if (input.value.trim() !== '') {
+                        draftNilai[nisn] = input.value;
+                    }
+                });
+                localStorage.setItem(draftKey, JSON.stringify(draftNilai));
+                console.log('Draft nilai disimpan...'); // Bisa dihapus jika sudah berfungsi
+            }
+        });
     } catch (error) {
         mainContentArea.innerHTML = `<div class="alert alert-danger">Gagal memuat halaman input nilai: ${error.message}</div>`;
     }
@@ -5591,6 +5667,8 @@ async function saveSemuaNilaiUlangan(ulanganId) {
             daftarNilai: daftarNilai,
             rekapNilai: rekapNilai
         });
+
+        localStorage.removeItem(`draft_nilai_${ulanganId}`);
         
         Toastify({ text: "Semua nilai berhasil disimpan!", style: { background: "green" } }).showToast();
         showDaftarUlanganView();
@@ -5743,6 +5821,33 @@ async function showRekapTabunganSiswaView() {
 // =================================================================
 // === AKHIR DARI FUNGSI BARU ===
 // =================================================================
+// === KODE BARU UNTUK MENGECEK SESI SAAT HALAMAN DIMUAT ===
+(async () => {
+    const savedUser = localStorage.getItem('currentUserGuru');
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+
+        // Tampilkan konten utama dan sembunyikan form login
+        loginContainer.style.display = 'none';
+        mainContainer.style.display = 'flex';
+        
+        // Atur tampilan sesuai data user yang tersimpan
+        welcomeMessage.innerHTML = `<strong>${currentUser.name}</strong>`;
+        if (currentUser.jabatan === 'Bendahara' || currentUser.role === 'admin') {
+            document.getElementById('menu-rekap-tabungan').style.display = 'block';
+        }
+        const isWaliKelas = currentUser.role === 'walikelas';
+        sidebarUnscannedLink.style.display = isWaliKelas ? 'block' : 'none';
+        sidebarManualLink.style.display = isWaliKelas ? 'block' : 'none';
+        sidebarDailyCorrectionLink.style.display = isWaliKelas ? 'block' : 'none';
+        menuWalikelasOnly.style.display = isWaliKelas ? 'block' : 'none';
+        sidebarCatatanHarianLink.style.display = isWaliKelas ? 'block' : 'none';
+
+        // Tampilkan konten default (dashboard)
+        await showQuickSummary();
+    }
+})();
+// === AKHIR DARI KODE BARU ===
 </script>
 </body>
 </html>
