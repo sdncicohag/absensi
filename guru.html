@@ -101,7 +101,7 @@
                     <li><a href="#" id="sidebar-nilai-semester"><i class="fas fa-keyboard"></i> Input Nilai Rapor</a></li>
                     <li><a href="#" id="sidebar-tabungan-kelas"><i class="fas fa-piggy-bank"></i> Tabungan Kelas</a></li>
                     <li><a href="#" id="sidebar-bank-materi"><i class="fas fa-book-reader"></i> Bank Materi</a></li>
-                        <li><a href="#" id="sidebar-nilai-ulangan"><i class="fas fa-marker"></i> Nilai Ulangan</a></li>
+                    <li><a href="#" id="sidebar-nilai-ulangan"><i class="fas fa-marker"></i> Nilai Ulangan</a></li>
 
 
                 </ul>
@@ -624,6 +624,8 @@ function hideAllMainContentAreas() {
     document.getElementById('sidebar-rekap-tabungan').addEventListener('click', (e) => { e.preventDefault(); showRekapSemuaTabungan(); });
     document.getElementById('sidebar-bank-materi').addEventListener('click', (e) => { e.preventDefault(); showBankMateriView(); });
     document.getElementById('sidebar-nilai-ulangan').addEventListener('click', (e) => { e.preventDefault(); showDaftarUlanganView(); });
+
+
 
 
     
@@ -4293,14 +4295,14 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
             Toastify({ text: "Materi berhasil dihapus!", style: { background: "green" } }).showToast();
             $('#deleteConfirmModal').modal('hide');
             showBankMateriView();
-        } else if (context === 'tabungan') {
+        } else if (context === 'setoran_bank') { 
             const docRef = db.collection('riwayat_setoran_bank').doc(txToDelete.id);
             const rekapRef = db.collection('rekap_saldo_setoran').doc('utama');
             await docRef.delete();
             await rekapRef.update({ totalDisetor: firebase.firestore.FieldValue.increment(-txToDelete.jumlah) });
             Toastify({ text: "Catatan setoran berhasil dihapus!", style: { background: "green" } }).showToast();
             $('#deleteConfirmModal').modal('hide');
-            showSetoranBankView();
+            showSetoranBankView(); // Muat ulang tampilan setoran bank
         } else if (context === 'tabungan') {
             const txDate = new Date(txToDelete.tanggal);
             const docId = `${rekeningId}_${txDate.getFullYear()}_${String(txDate.getMonth() + 1).padStart(2, '0')}`;
@@ -4349,7 +4351,7 @@ document.getElementById('confirmDeleteBtn').addEventListener('click', async func
 });
 
 // --- KUMPULAN FUNGSI BARU UNTUK TABUNGAN KELAS ---
-// GANTI KESELURUHAN FUNGSI INI DENGAN VERSI FINAL
+// GANTI FUNGSI LAMA DENGAN VERSI BARU INI
 async function showTabunganKelas() {
     hideAllMainContentAreas();
     mainContentArea.style.display = 'block';
@@ -4372,7 +4374,12 @@ async function showTabunganKelas() {
                     </div>
                     <h5 id="total-saldo-display" class="text-muted mb-0">Memuat total saldo...</h5>
                 </div>
-                
+
+                <div class="mt-3 border-top pt-3">
+                    <button class="btn btn-outline-info btn-block" onclick="showRekapTabunganSiswaView()">
+                        <i class="fas fa-file-invoice-dollar mr-2"></i>Lihat Rekap Tabungan per Siswa
+                    </button>
+                </div>
                 <div class="month-selector-container card card-body bg-light p-2 my-3" style="position: relative;">
                     <div class="d-flex justify-content-center align-items-center">
                         <button id="prev-month-btn" class="btn btn-light"><i class="fas fa-chevron-left"></i></button>
@@ -4383,9 +4390,9 @@ async function showTabunganKelas() {
                     <div id="month-year-selector" class="card shadow-lg" style="display: none; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); z-index: 1000; width: 280px;">
                         <div class="card-body p-2">
                             <div class="d-flex justify-content-between align-items-center mb-2">
-                                <button id="selector-prev-year" class="btn btn-sm btn-outline-secondary">&lt;</button>
+                                <button id="selector-prev-year" class="btn btn-sm btn-outline-secondary"><</button>
                                 <span id="selector-current-year" class="font-weight-bold"></span>
-                                <button id="selector-next-year" class="btn btn-sm btn-outline-secondary">&gt;</button>
+                                <button id="selector-next-year" class="btn btn-sm btn-outline-secondary">></button>
                             </div>
                             <div id="selector-month-grid" class="row no-gutters"></div>
                         </div>
@@ -4435,7 +4442,7 @@ async function showTabunganKelas() {
                     group.transactions.sort((a, b) => a.namaSiswa.localeCompare(b.namaSiswa));
                     group.transactions.forEach(tx => {
                         const isSetor = tx.tipe === 'Setor';
-                        const txDataString = JSON.stringify(tx).replace(/"/g, '&quot;');
+                        const txDataString = JSON.stringify(tx).replace(/"/g, '"');
                         accordionHtml += `<li class="list-group-item d-flex justify-content-between align-items-center"><div>${tx.namaSiswa}<small class="d-block text-muted">${tx.keterangan || ''}</small></div><div class="d-flex align-items-center"><span class="mr-3 font-weight-bold ${isSetor ? 'text-success' : 'text-danger'}">${isSetor ? '+' : '-'} ${new Intl.NumberFormat('id-ID').format(tx.jumlah)}</span><div class="btn-group btn-group-sm"><button class="btn btn-outline-warning" onclick='openEditTabunganModal(${txDataString})'><i class="fas fa-edit"></i></button><button class="btn btn-outline-danger" onclick='confirmDeleteTabungan(${txDataString})'><i class="fas fa-trash"></i></button></div></div></li>`;
                     });
                     accordionHtml += '</ul></div></div>';
@@ -5594,6 +5601,148 @@ async function saveSemuaNilaiUlangan(ulanganId) {
         btn.disabled = false; btn.innerHTML = '<i class="fas fa-save mr-2"></i>Simpan Semua Nilai';
     }
 }
+// =================================================================
+// === KODE FUNGSI BARU UNTUK REKAP TABUNGAN SISWA (WALI KELAS) ===
+// =================================================================
+async function showRekapTabunganSiswaView() {
+    hideAllMainContentAreas();
+    mainContentArea.style.display = 'block';
+    mainContentArea.innerHTML = `<div class="text-center p-5"><div class="spinner-border text-primary"></div><p class="mt-2">Mengumpulkan dan menghitung rekap tabungan...</p></div>`;
+
+    const kelasId = currentUser.kelasDiampu;
+
+    try {
+        // 1. Ambil SEMUA dokumen transaksi untuk kelas ini
+        const rekapSnapshot = await db.collection('tabungan_kelas')
+            .where('idKelas', '==', kelasId)
+            .get();
+
+        if (rekapSnapshot.empty) {
+            mainContentArea.innerHTML = `
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="font-weight-bolder mb-0">Rekap Tabungan Siswa - Kelas ${kelasId}</h4>
+                            <button class="btn btn-light" onclick="showTabunganKelas()"><i class="fas fa-arrow-left mr-2"></i>Kembali</button>
+                        </div>
+                        <hr>
+                        <div class="alert alert-info">Belum ada riwayat transaksi tabungan untuk kelas ${kelasId}.</div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // 2. Proses semua transaksi dan kelompokkan per siswa
+        const studentData = {};
+        rekapSnapshot.forEach(doc => {
+            const riwayatBulanan = doc.data().riwayatTransaksi || [];
+            riwayatBulanan.forEach(tx => {
+                if (!studentData[tx.nisn]) {
+                    studentData[tx.nisn] = {
+                        nisn: tx.nisn,
+                        namaSiswa: tx.namaSiswa,
+                        totalSaldo: 0,
+                        riwayat: []
+                    };
+                }
+                studentData[tx.nisn].totalSaldo += (tx.tipe === 'Setor' ? tx.jumlah : -tx.jumlah);
+                studentData[tx.nisn].riwayat.push({
+                    tanggal: tx.tanggal,
+                    jumlah: tx.jumlah,
+                    tipe: tx.tipe
+                });
+            });
+        });
+
+        // 3. Ubah objek menjadi array dan urutkan berdasarkan nama siswa
+        const studentArray = Object.values(studentData).sort((a, b) => {
+            return a.namaSiswa.localeCompare(b.namaSiswa);
+        });
+
+        // 4. Bangun tampilan HTML menggunakan accordion
+        let accordionHtml = '<div class="accordion" id="rekapSiswaAccordion">';
+        if (studentArray.length === 0) {
+             accordionHtml += '<p class="text-center text-muted">Tidak ada data siswa yang memiliki tabungan.</p>';
+        } else {
+            studentArray.forEach(siswa => {
+                const saldoFormatted = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(siswa.totalSaldo);
+                const collapseId = `collapse-rekap-${siswa.nisn}`;
+
+                siswa.riwayat.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+                
+                let riwayatTableHtml = `
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped mb-0">
+                            <thead><tr><th>Tanggal</th><th>Jenis</th><th class="text-right">Jumlah (Rp)</th></tr></thead>
+                            <tbody>`;
+                
+                if(siswa.riwayat.length === 0) {
+                    riwayatTableHtml += `<tr><td colspan="3" class="text-center">Belum ada riwayat transaksi.</td></tr>`;
+                } else {
+                    siswa.riwayat.forEach(tx => {
+                        const isSetor = tx.tipe === 'Setor';
+                        riwayatTableHtml += `
+                            <tr>
+                                <td>${new Date(tx.tanggal + 'T00:00:00').toLocaleDateString('id-ID')}</td>
+                                <td><span class="badge badge-${isSetor ? 'success' : 'warning'}">${tx.tipe}</span></td>
+                                <td class="text-right font-weight-bold ${isSetor ? 'text-success' : 'text-danger'}">
+                                    ${isSetor ? '+' : '-'} ${new Intl.NumberFormat('id-ID').format(tx.jumlah)}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+                riwayatTableHtml += `</tbody></table></div>`;
+
+                accordionHtml += `
+                    <div class="card mb-2">
+                        <div class="card-header p-0" id="heading-${siswa.nisn}">
+                            <h2 class="mb-0">
+                                <button class="btn btn-light btn-block text-left p-3" type="button" data-toggle="collapse" data-target="#${collapseId}">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-primary font-weight-bold">${siswa.namaSiswa}</span>
+                                        <span class="badge badge-primary badge-pill p-2" style="font-size: 1rem;">${saldoFormatted}</span>
+                                    </div>
+                                </button>
+                            </h2>
+                        </div>
+                        <div id="${collapseId}" class="collapse" data-parent="#rekapSiswaAccordion">
+                            <div class="card-body p-0">
+                                ${riwayatTableHtml}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        accordionHtml += '</div>';
+
+        // 5. Tampilkan hasilnya
+        mainContentArea.innerHTML = `
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="font-weight-bolder mb-0">Rekap Tabungan Siswa - Kelas ${kelasId}</h4>
+                        <button class="btn btn-light" onclick="showTabunganKelas()">
+                            <i class="fas fa-arrow-left mr-2"></i>Kembali
+                        </button>
+                    </div>
+                    <p class="text-muted">Berikut adalah rincian total saldo tabungan untuk setiap siswa di kelas Anda. Klik pada nama siswa untuk melihat riwayat transaksinya.</p>
+                    <hr>
+                    ${accordionHtml}
+                </div>
+            </div>
+        `;
+
+    } catch (error) {
+        console.error("Gagal membuat rekap tabungan siswa:", error);
+        mainContentArea.innerHTML = `<div class="alert alert-danger">Terjadi kesalahan saat memuat rekap tabungan: ${error.message}</div>`;
+    }
+}
+// =================================================================
+// === AKHIR DARI FUNGSI BARU ===
+// =================================================================
 </script>
 </body>
 </html>
