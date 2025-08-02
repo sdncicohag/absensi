@@ -432,7 +432,6 @@
     let isBulkEditMode = false;
     let classChart = null;
 
-
     // --- FUNGSI UNTUK TOGGLE PASSWORD VISIBILITY ---
     const togglePassword = document.getElementById('togglePassword');
     const passwordInput = document.getElementById('password');
@@ -474,6 +473,12 @@
             const snapshot = await db.collection('staff').where('username', '==', username).where('password', '==', password).where('role', '==', 'admin').get();
             if (snapshot.empty) throw new Error("Username atau password salah, atau Anda bukan admin.");
 
+            // === BARIS BARU UNTUK MENYIMPAN SESI ===
+            // Kita hanya perlu menyimpan penanda bahwa admin sudah login
+            const adminData = snapshot.docs[0].data();
+            localStorage.setItem('currentAdmin', JSON.stringify({ username: adminData.username, name: adminData.namaLengkap }));
+            // === AKHIR BARIS BARU ===
+
             loginContainer.classList.add('d-none');
             mainWrapper.style.display = 'flex';
             renderStaticClasses();
@@ -487,9 +492,14 @@
         }
     });
 
+    // GANTI FUNGSI LAMA DENGAN INI
     document.getElementById('logoutButton').addEventListener('click', () => {
+        // === BARIS BARU UNTUK MENGHAPUS SESI ===
+        localStorage.removeItem('currentAdmin');
+        // === AKHIR BARIS BARU ===
+        
         mainWrapper.style.display = 'none';
-        loginContainer.classList.remove('d-none'); // Ganti baris ini
+        loginContainer.classList.remove('d-none');
         document.getElementById('loginFormAdmin').reset();
     });
 
@@ -1395,7 +1405,19 @@
             btn.prop('disabled', true); // Non-aktifkan kembali setelah selesai
         }
     }
-
+    
+    // === KODE BARU UNTUK MENGECEK SESI SAAT HALAMAN DIMUAT ===
+    (() => {
+        const savedAdmin = localStorage.getItem('currentAdmin');
+        if (savedAdmin) {
+            // Jika ada sesi admin, langsung tampilkan panel
+            loginContainer.classList.add('d-none');
+            mainWrapper.style.display = 'flex';
+            renderStaticClasses();
+            showDashboardView();
+        }
+    })();
+    // === AKHIR DARI KODE BARU ===
 
 </script>
 </body>
